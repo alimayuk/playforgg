@@ -2,5 +2,10 @@
   "HomePage": {
     "title": "Merhaba dünya!",
     "about": "Hakkında sayfasına git"
+  },
+  "LocaleSwitcher": {
+    "locale": "Türkçe",
+    "en": "İngilizce",
+    "tr": "Türkçe"
   }
 }

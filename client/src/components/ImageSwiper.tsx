@@ -1,7 +1,7 @@
 'use client';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -16,11 +16,17 @@ const images = [
 export default function ImageSwiper() {
     return (
         <Swiper
-            modules={[Navigation, Pagination]}
+            modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={20}
             slidesPerView={1}
             navigation
             pagination={{ clickable: true }}
+            loop={true}
+            speed={700}
+            autoplay={{
+                delay: 5000,
+                disableOnInteraction: false,
+            }}
             className="max-w-screen-2xl mx-auto my-8 p-4 max-h-[600px] overflow-hidden rounded-lg shadow-lg select-none"
         >
             {images.map((src, index) => (

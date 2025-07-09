@@ -16,18 +16,22 @@ interface DropdownProps {
 export default function Navbar() {
   const menuData: MenuItem[] = [
     {
-      title: "Oyunlar",
-      children: [
-        { title: "Aksiyon", link: "/games/action" },
-        { title: "RPG", link: "/games/rpg" },
-        {
-          title: "Strateji",
-        },
-      ],
+      title: "Sana Özel",
+      link: "/special",
     },
+    {
+    title: "Oyunlar",
+    children: [
+      { title: "Tüm Oyunlar", link: "/games" },
+      { title: "Aksiyon", link: "/games/action" },
+      { title: "RPG", link: "/games/rpg" },
+      { title: "Strateji", link: "/games/strategy" },
+    ],
+  },
     {
       title: "E-spor",
       children: [
+        { title: "Maçlar", link: "/esports/matches" },
         { title: "Turnuvalar", link: "/esports/tournaments" },
         { title: "Haberler", link: "/esports/news" },
         {
@@ -35,23 +39,21 @@ export default function Navbar() {
         },
       ],
     },
+    // {
+    //   title: "Kanallar",
+    //   children: [
+    //     { title: "Twitch", link: "/streamers/twitch" },
+    //     { title: "Kick", link: "/streamers/kick" },
+    //     { title: "YouTube", link: "/streamers/youtube" },
+    //   ],
+    // },
+    // { title: "Bloglar", link: "/blog" },
     {
-      title: "Yayıncılar",
+      title: "Bloglar",
       children: [
-        { title: "Twitch", link: "/streamers/twitch" },
-        { title: "Kick", link: "/streamers/kick" },
-        { title: "YouTube", link: "/streamers/youtube" },
-      ],
-    },
-    { title: "Blog", link: "/blog" },
-    {
-      title: "Kılavuzlar",
-      children: [
-        { title: "Yeni Başlayanlar", link: "/guides/beginners" },
-        { title: "İleri Düzey", link: "/guides/advanced" },
-        {
-          title: "Oyun İpuçları", link: "/guides/tips",
-        },
+        { title: "Tüm Bloglar", link: "/blogs" },
+        { title: "Kılavuzlar", link: "/blogs/guides" },
+        { title: "Oyun İpuçları", link: "/blogs/tips" },
       ],
     },
     {
