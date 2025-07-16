@@ -1,8 +1,8 @@
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import '../globals.css';
+import { AntdRegistry } from '@ant-design/nextjs-registry';
 export default async function LocaleLayout({
   children,
   params
@@ -20,8 +20,7 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body>
         <NextIntlClientProvider>
-          <LanguageSwitcher />
-          {children}
+          <AntdRegistry>{children}</AntdRegistry>
         </NextIntlClientProvider>
       </body>
     </html>

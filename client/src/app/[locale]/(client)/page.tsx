@@ -351,7 +351,7 @@ export default function HomePage() {
                   Trend
                 </h3>
                 <h3 className="font-semibold text-xl text-white uppercase whitespace-nowrap">
-                  Formlar
+                  Forumlar
                 </h3>
                 <div className="flex-grow h-px bg-white opacity-50"></div>
               </div>
@@ -438,8 +438,8 @@ export default function HomePage() {
 
         {/* Her oyun ayrı ayrı */}
         {Object.entries(gameDataByType).map(([game, data]) => {
-          const visibleTeams = data.teams.slice(0, 5);
-          const hasMore = data.teams.length > 5;
+          const visibleTeams = data.teams.slice(0, 3);
+          const hasMore = data.teams.length > 3;
 
           return (
             <div key={game} className="space-y-4">
@@ -545,9 +545,6 @@ export default function HomePage() {
           </div>
         </div>
 
-      </div>
-      <div className='mt-12'>
-        <Footer />
       </div>
 
       {/* <h1>{t('title')}</h1>

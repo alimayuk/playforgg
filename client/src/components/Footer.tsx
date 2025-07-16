@@ -31,7 +31,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-gray-900 rounded-xl my-5 text-white py-6 px-4 tracking-wide text-sm">
+    <footer className="bg-gray-900 rounded-xl my-5 text-white py-6 px-4 tracking-wide text-sm max-w-screen-2xl mx-auto">
       <div className="w-full mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
 
         {/* Sol - Linkler */}

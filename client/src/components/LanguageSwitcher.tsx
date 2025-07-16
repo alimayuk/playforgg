@@ -20,14 +20,9 @@ export default function Navbar() {
       link: "/special",
     },
     {
-    title: "Oyunlar",
-    children: [
-      { title: "Tüm Oyunlar", link: "/games" },
-      { title: "Aksiyon", link: "/games/action" },
-      { title: "RPG", link: "/games/rpg" },
-      { title: "Strateji", link: "/games/strategy" },
-    ],
-  },
+      title: "Oyunlar",
+      link: "/games",
+    },
     {
       title: "E-spor",
       children: [
@@ -57,9 +52,13 @@ export default function Navbar() {
       ],
     },
     {
+      title: "Forumlar", link: "/forums",
+    },
+    {
       title: "Topluluk", link: "/community",
     },
   ];
+  const [modalType, setModalType] = useState<'login' | 'register' | null>(null);
 
   return (
     <header>
@@ -78,16 +77,104 @@ export default function Navbar() {
           {/* Ayırıcı çizgi */}
           <div className="h-6 w-px bg-gray-600 hidden sm:block" />
 
-          {/* Oturum Aç butonu - dolu arka plan */}
-          <Link
-            href="/login"
+          {/* Oturum Aç butonu */}
+          <button
+            onClick={() => setModalType('login')}
             className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm font-semibold hover:bg-orange-600 transition"
           >
             Oturum Aç
-          </Link>
+          </button>
         </div>
 
       </nav>
+      {/* Modal */}
+      {/* Modal */}
+      {modalType && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md p-6 relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              onClick={() => setModalType(null)}
+            >
+              ✕
+            </button>
+
+            {modalType === 'login' ? (
+              <>
+                <h2 className="text-2xl font-bold mb-4 text-center text-black">Giriş Yap</h2>
+                <form className="space-y-4">
+                  <input
+                    type="email"
+                    placeholder="Kullanıcı Adı"
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Şifre"
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded"
+                  >
+                    Giriş Yap
+                  </button>
+                </form>
+                <p className="text-center mt-4 text-sm text-black">
+                  Hesabın yok mu?{' '}
+                  <button
+                    onClick={() => setModalType('register')}
+                    className="text-orange-500 hover:underline"
+                  >
+                    Kayıt ol
+                  </button>
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-4 text-center text-black">Kayıt Ol</h2>
+                <form className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Kullanıcı Adı  "
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  <input
+                    type="email"
+                    placeholder="E-posta"
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Şifre"
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Şifre Tekrar"
+                    className="w-full border border-gray-300 p-2 rounded"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded"
+                  >
+                    Kayıt Ol
+                  </button>
+                </form>
+                <p className="text-center mt-4 text-sm text-black">
+                  Zaten hesabın var mı?{' '}
+                  <button
+                    onClick={() => setModalType('login')}
+                    className="text-orange-500 hover:underline"
+                  >
+                    Giriş yap
+                  </button>
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -74,41 +74,42 @@ export default function GamesPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6">
                 {filteredGames.map((game) => (
-                    <div
-                        key={game.id}
-                        className="relative rounded-xl overflow-hidden cursor-pointer group shadow-lg isolate bg-gray-900 h-96 w-72 transition-transform duration-500 hover:scale-105"
-                    >
-                        {/* Arka plan resmi */}
-                        <img
-                            src={game.image}
-                            alt={game.title}
-                            className="absolute inset-0 w-full h-full object-cover -z-10 transition-transform duration-500 group-hover:scale-105"
-                        />
+                    <a href={`/games/${game.id}`} key={game.id} className="group">
+                        <div
+                            className="relative rounded-xl overflow-hidden cursor-pointer group shadow-lg isolate bg-gray-900 h-96 w-72 transition-transform duration-500 hover:scale-105"
+                        >
+                            {/* Arka plan resmi */}
+                            <img
+                                src={game.image}
+                                alt={game.title}
+                                className="absolute inset-0 w-full h-full object-cover -z-10 transition-transform duration-500 group-hover:scale-105"
+                            />
 
-                        {/* Karartma overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/70 to-transparent -z-10 rounded-xl"></div>
+                            {/* Karartma overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/70 to-transparent -z-10 rounded-xl"></div>
 
-                        {/* Kategori etiketi */}
-                        <span className="absolute top-5 right-5 bg-orange-600 text-white text-sm font-semibold px-3 py-1 rounded-full z-10">
-                            {game.category}
-                        </span>
+                            {/* Kategori etiketi */}
+                            <span className="absolute top-5 right-5 bg-orange-600 text-white text-sm font-semibold px-3 py-1 rounded-full z-10">
+                                {game.category}
+                            </span>
 
-                        {/* Alt içerik container */}
-                        <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 bg-gradient-to-t from-gray-900/90 to-transparent rounded-b-xl flex flex-col">
-                            {/* Başlık */}
-                            <h3 className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 line-clamp-3">
-                                {game.title}
-                            </h3>
+                            {/* Alt içerik container */}
+                            <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 bg-gradient-to-t from-gray-900/90 to-transparent rounded-b-xl flex flex-col">
+                                {/* Başlık */}
+                                <h3 className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 line-clamp-3">
+                                    {game.title}
+                                </h3>
 
-                            {/* Açıklama */}
-                            <div
-                                className="mt-2 text-gray-300 text-sm opacity-0 max-h-0 overflow-hidden transition-all duration-500 group-hover:opacity-100 group-hover:max-h-28 line-clamp-4"
-                                style={{ transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)" }}
-                            >
-                                {game.description}
+                                {/* Açıklama */}
+                                <div
+                                    className="mt-2 text-gray-300 text-sm opacity-0 max-h-0 overflow-hidden transition-all duration-500 group-hover:opacity-100 group-hover:max-h-28 line-clamp-4"
+                                    style={{ transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)" }}
+                                >
+                                    {game.description}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 ))}
                 {filteredGames.length === 0 && (
                     <p className="text-gray-500 col-span-full">Bu kategoride oyun bulunamadı.</p>
