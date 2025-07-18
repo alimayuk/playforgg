@@ -46,3 +46,57 @@
           ))}
         </div> 
       </div> */}
+
+
+// takımlar kart yapısı 
+//  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+//                 {visibleTeams.map((team) => (
+//                   <div
+//                     key={team.name}
+//                     className="bg-gray-900 text-white rounded-xl shadow-lg p-5 flex flex-col"
+//                   >
+//                     {/* Logo + Başlık */}
+//                     <div className="flex items-center gap-4 mb-4">
+//                       <img
+//                         src={team.logo}
+//                         alt={team.name}
+//                         className="w-16 h-16 object-contain rounded p-1"
+//                       />
+//                       <div>
+//                         <h4 className="text-xl font-bold">{team.name}</h4>
+//                         <p className="text-sm text-gray-400">
+//                           {team.country} • {team.rank}
+//                         </p>
+//                       </div>
+//                     </div>
+
+//                     {/* Oyuncular */}
+//                     <div className="grid grid-cols-1 gap-2 mt-auto">
+//                       {team.players.map((player) => (
+//                         <div
+//                           key={player.name}
+//                           className="flex items-center gap-3 bg-gray-800 px-3 py-2 rounded-md"
+//                         >
+//                           {/* <img
+//                             src={player.image}
+//                             alt={player.name}
+//                             className="w-16 h-16  object-cover border-b border-gray-600"
+//                           /> */}
+//                           <div>
+//                             <p className="text-sm font-medium uppercase">{player.name}</p>
+//                             <p className="text-xs text-gray-400">{player.role}</p>
+//                           </div>
+//                           <span className="text-xs text-gray-500 ml-auto">{player.country}</span>
+//                         </div>
+//                       ))}
+//                     </div>
+//                   </div>
+//                 ))}
+
+//                 {/* Hepsini Gör Kartı */}
+//                 {hasMore && (
+//                   <div className="bg-gray-100 border-2 border-dashed border-orange-400 rounded-xl shadow-lg p-5 flex items-center justify-center text-center hover:bg-orange-50 transition cursor-pointer">
+//                     <span className="text-orange-600 font-semibold text-lg">Hepsini Gör →</span>
+//                   </div>
+//                 )}
+//               </div>

@@ -94,10 +94,10 @@ const gameDataByType = {
         country: "TR",
         players: [
           { image: "https://img-cdn.hltv.org/playerbodyshot/FOrUruleFFTDLRcrR40yCE.png?ixlib=java-2.1.0&w=400&s=bb1ddc04f4752f448f6bfb76ae19ce5f", name: "Maj3r", role: "AWP", country: "TR" },
-          { image: "https://picsum.photos/400/200?random=7", name: "Player 7", role: "IGL", country: "TR" },
-          { image: "https://picsum.photos/400/200?random=8", name: "Player 8", role: "Rifler", country: "TR" },
-          { image: "https://picsum.photos/400/200?random=9", name: "Player 9", role: "Support", country: "TR" },
-          { image: "https://picsum.photos/400/200?random=10", name: "Player 10", role: "Entry", country: "TR" },
+          { image: "https://picsum.photos/400/200?random=7", name: "Xantares", role: "IGL", country: "TR" },
+          { image: "https://picsum.photos/400/200?random=8", name: "Woxic", role: "Rifler", country: "TR" },
+          { image: "https://picsum.photos/400/200?random=9", name: "Wicadia", role: "Support", country: "TR" },
+          { image: "https://picsum.photos/400/200?random=10", name: "jottAAA", role: "Entry", country: "TR" },
         ],
       },
       {
@@ -449,44 +449,37 @@ export default function HomePage() {
               </h3>
 
               {/* Takım Kartları */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {visibleTeams.map((team) => (
                   <div
                     key={team.name}
-                    className="bg-gray-900 text-white rounded-xl shadow-lg p-5 flex flex-col"
+                    className="relative bg-gray-900 text-white rounded-lg shadow-md p-4 overflow-hidden flex flex-col gap-3"
                   >
-                    {/* Logo + Başlık */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <img
-                        src={team.logo}
-                        alt={team.name}
-                        className="w-16 h-16 object-contain rounded p-1"
-                      />
-                      <div>
-                        <h4 className="text-xl font-bold">{team.name}</h4>
-                        <p className="text-sm text-gray-400">
-                          {team.country} • {team.rank}
-                        </p>
-                      </div>
+                    {/* Silüet Logo - Küçük ve Sol Üstte */}
+                    <img
+                      src={team.logo}
+                      alt={team.name}
+                      className="absolute top-2 left-2  h-32 opacity-10 object-contain pointer-events-none"
+                    />
+
+                    {/* Başlık */}
+                    <div className="relative z-10">
+                      <h4 className="text-base font-semibold">{team.name}</h4>
+                      <p className="text-xs text-gray-400">{team.country} • {team.rank}</p>
                     </div>
 
                     {/* Oyuncular */}
-                    <div className="grid grid-cols-1 gap-2 mt-auto">
+                    <div className="relative z-10 flex flex-col gap-1">
                       {team.players.map((player) => (
                         <div
                           key={player.name}
-                          className="flex items-center gap-3 bg-gray-800 px-3 py-2 rounded-md"
+                          className="flex items-center justify-between text-sm text-gray-300"
                         >
-                          {/* <img
-                            src={player.image}
-                            alt={player.name}
-                            className="w-16 h-16  object-cover border-b border-gray-600"
-                          /> */}
-                          <div>
-                            <p className="text-sm font-medium uppercase">{player.name}</p>
-                            <p className="text-xs text-gray-400">{player.role}</p>
+                          <div className="flex flex-col ">
+                            <span className=" max-w-[120px]">{player.name}</span>
+                            <span className="text-xs text-gray-500">{player.role}</span>
                           </div>
-                          <span className="text-xs text-gray-500 ml-auto">{player.country}</span>
+                          <span className="text-xs text-gray-500">{player.country}</span>
                         </div>
                       ))}
                     </div>
@@ -495,12 +488,11 @@ export default function HomePage() {
 
                 {/* Hepsini Gör Kartı */}
                 {hasMore && (
-                  <div className="bg-gray-100 border-2 border-dashed border-orange-400 rounded-xl shadow-lg p-5 flex items-center justify-center text-center hover:bg-orange-50 transition cursor-pointer">
-                    <span className="text-orange-600 font-semibold text-lg">Hepsini Gör →</span>
+                  <div className="bg-gray-100 border-2 border-dashed border-orange-400 rounded-lg shadow-md p-4 flex items-center justify-center text-center hover:bg-orange-50 transition cursor-pointer">
+                    <span className="text-orange-600 font-semibold text-sm">Hepsini Gör →</span>
                   </div>
                 )}
               </div>
-
             </div>
           );
         })}

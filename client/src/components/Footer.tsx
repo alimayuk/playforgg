@@ -13,7 +13,9 @@ import {
   Building2,
   Instagram,
   X,
+  Youtube,
 } from 'lucide-react';
+import { TikTokOutlined } from '@ant-design/icons';
 
 export default function Footer() {
   const t = useTranslations('LocaleSwitcher');
@@ -84,6 +86,16 @@ export default function Footer() {
           <li>
             <a href="#" className="hover:text-sky-400 transition" aria-label="X">
               <X size={16} />
+            </a>
+          </li>
+          <li>
+            <a href="#" className="hover:text-blue-500 transition" aria-label="Youtube">
+              <Youtube size={16} />
+            </a>
+          </li>
+          <li>
+            <a href="#" className="hover:text-blue-500 transition" aria-label="Tiktok">
+              <TikTokOutlined size={16} />
             </a>
           </li>
         </ul>
