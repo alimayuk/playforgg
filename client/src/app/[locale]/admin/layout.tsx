@@ -16,6 +16,8 @@ const { Header, Content } = Layout;
 type MenuItem = {
   key: string;
   children?: MenuItem[];
+  icon?: React.ReactNode;
+  label: React.ReactNode;
 };
 
 type LevelKeys = {
@@ -70,31 +72,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   // Menü elemanları
-  const menuItems = [
+  const pathSegments = pathname?.split("/") ?? [];
+  const locale = pathSegments[1] || "tr"; // default 'tr' yapabilirsin
+
+  // Menü elemanları
+  const menuItems: MenuItem[] = [
     {
-      key: "/admin",
+      key: `/${locale}/admin`,
       icon: <UserOutlined />,
-      label: <a className="text-inherit" href="/admin">Ana Sayfa</a>,
+      label: <a className="text-inherit" href={`/${locale}/admin`}>Ana Sayfa</a>,
     },
     {
-      key: "/admin/blogs",
+      key: `/${locale}/admin/blogs`,
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href="/admin/blogs">Bloglar</a>,
+      label: <a className="text-inherit" href={`/${locale}/admin/blogs`}>Bloglar</a>,
     },
     {
-      key: "/admin/categories",
+      key: `/${locale}/admin/categories`,
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href="/admin/categories">Kategoriler</a>,
+      label: <a className="text-inherit" href={`/${locale}/admin/categories`}>Kategoriler</a>,
     },
     {
-      key: "/admin/portfolios",
+      key: `/${locale}/admin/portfolios`,
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href="/admin/portfolios">Portföyler</a>,
+      label: <a className="text-inherit" href={`/${locale}/admin/portfolios`}>Portföyler</a>,
     },
     {
-      key: "/admin/settings",
+      key: `/${locale}/admin/settings`,
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href="/admin/settings">Ayarlar</a>,
+      label: <a className="text-inherit" href={`/${locale}/admin/settings`}>Ayarlar</a>,
     },
     {
       key: "logout",

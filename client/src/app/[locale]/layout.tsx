@@ -18,7 +18,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body>
+      <body suppressHydrationWarning={true}>
         <NextIntlClientProvider>
           <AntdRegistry>{children}</AntdRegistry>
         </NextIntlClientProvider>

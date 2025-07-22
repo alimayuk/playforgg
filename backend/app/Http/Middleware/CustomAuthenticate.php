@@ -9,7 +9,6 @@ class CustomAuthenticate extends Middleware
 {
     protected function redirectTo($request)
     {
-        // Eğer API isteğiyse veya JSON bekleniyorsa yönlendirme yapma
         if ($request->expectsJson() || $request->is('api/*')) {
             return null;
         }
