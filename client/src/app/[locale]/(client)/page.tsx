@@ -273,7 +273,43 @@ const upcomingMatches = [
   },
 ];
 
-
+const allGames = [
+  {
+    id: 1,
+    title: 'Cyber Warfare Güncellemesi - FPS Aksiyon Oyunu - 2024 Yaz Dönemi',
+    category: 'Aksiyon',
+    image: 'https://picsum.photos/400/200?random=1',
+    description: 'Yüksek tempolu FPS aksiyon oyunu. Hızlı refleksler ve strateji gerektirir. aksiyon dolu savaşlar seni bekliyor! fight for survival in a dystopian future. wage war against rogue AI and cybernetic enemies. join the resistance and fight for humanity\'s future.',
+  },
+  {
+    id: 2,
+    title: 'Kingdom Saga',
+    category: 'RPG',
+    image: 'https://picsum.photos/400/200?random=2',
+    description: 'Derin hikayesiyle RPG deneyimi.',
+  },
+  {
+    id: 3,
+    title: 'War Tactics',
+    category: 'Strateji',
+    image: 'https://picsum.photos/400/200?random=3',
+    description: 'Gerçek zamanlı strateji savaşları.',
+  },
+  {
+    id: 4,
+    title: 'Dark Realms',
+    category: 'RPG',
+    image: 'https://picsum.photos/400/200?random=4',
+    description: 'Gotik dünyada karakter geliştirme.',
+  },
+  {
+    id: 5,
+    title: 'Bullet Rush',
+    category: 'Aksiyon',
+    image: 'https://picsum.photos/400/200?random=5',
+    description: 'Reflekslerini konuştur!',
+  },
+];
 
 export default function HomePage() {
   const t = useTranslations('HomePage');
@@ -416,14 +452,14 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className='space-y-6 mt-12'>
+      {/* <div className='space-y-6 mt-12'>
         <Title title1={"Yaklaşan"} title2={'Maçlar'} />
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {upcomingMatches.map((match) => (
             <MatchCard key={match.id} match={match} />
           ))}
         </div>
-      </div>
+      </div> */}
       <div className='space-y-6 mt-12'>
         <Title title1={"Tüm"} title2={'Gönderiler'} />
         <div className="mt-12 p-6 w-full grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -432,43 +468,33 @@ export default function HomePage() {
           ))}
         </div>
       </div>
-      <div className="space-y-6 mt-12">
-        {/* Başlık */}
+      {/* <div className="space-y-6 mt-12">
         <Title title1={"E-spor"} title2={'Takımları'} />
-
-        {/* Her oyun ayrı ayrı */}
         {Object.entries(gameDataByType).map(([game, data]) => {
           const visibleTeams = data.teams.slice(0, 3);
           const hasMore = data.teams.length > 3;
 
           return (
             <div key={game} className="space-y-4">
-              {/* Oyun Başlığı */}
               <h3 className="text-2xl font-semibold text-white border-l-4 border-orange-500 pl-3 bg-gray-800 py-2">
                 {game}
               </h3>
-
-              {/* Takım Kartları */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {visibleTeams.map((team) => (
                   <div
                     key={team.name}
                     className="relative bg-gray-900 text-white rounded-lg shadow-md p-4 overflow-hidden flex flex-col gap-3"
                   >
-                    {/* Silüet Logo - Küçük ve Sol Üstte */}
                     <img
                       src={team.logo}
                       alt={team.name}
                       className="absolute top-2 left-2  h-32 opacity-10 object-contain pointer-events-none"
                     />
 
-                    {/* Başlık */}
                     <div className="relative z-10">
                       <h4 className="text-base font-semibold">{team.name}</h4>
                       <p className="text-xs text-gray-400">{team.country} • {team.rank}</p>
                     </div>
-
-                    {/* Oyuncular */}
                     <div className="relative z-10 flex flex-col gap-1">
                       {team.players.map((player) => (
                         <div
@@ -486,7 +512,6 @@ export default function HomePage() {
                   </div>
                 ))}
 
-                {/* Hepsini Gör Kartı */}
                 {hasMore && (
                   <div className="bg-gray-100 border-2 border-dashed border-orange-400 rounded-lg shadow-md p-4 flex items-center justify-center text-center hover:bg-orange-50 transition cursor-pointer">
                     <span className="text-orange-600 font-semibold text-sm">Hepsini Gör →</span>
@@ -496,8 +521,53 @@ export default function HomePage() {
             </div>
           );
         })}
-      </div>
+      </div> */}
+      <div className='space-y-6 mt-12'>
+        <Title title1={"Oyun"} title2={'İçerikleri'} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6">
+          {allGames.map((game) => (
+            <a href={`/games/${game.id}`} key={game.id} className="group">
+              <div
+                className="relative rounded-xl overflow-hidden cursor-pointer group shadow-lg isolate bg-gray-900 h-96 w-80 transition-transform duration-500 hover:scale-105"
+              >
+                {/* Arka plan resmi */}
+                <img
+                  src={game.image}
+                  alt={game.title}
+                  className="absolute inset-0 w-full h-full object-cover -z-10 transition-transform duration-500 group-hover:scale-105"
+                />
 
+                {/* Karartma overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/70 to-transparent -z-10 rounded-xl"></div>
+
+                {/* Kategori etiketi */}
+                <span className="absolute top-5 right-5 bg-orange-600 text-white text-sm font-semibold px-3 py-1 rounded-full z-10">
+                  {game.category}
+                </span>
+
+                {/* Alt içerik container */}
+                <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 bg-gradient-to-t from-gray-900/90 to-transparent rounded-b-xl flex flex-col">
+                  {/* Başlık */}
+                  <h3 className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 line-clamp-3">
+                    {game.title}
+                  </h3>
+
+                  {/* Açıklama */}
+                  <div
+                    className="mt-2 text-gray-300 text-sm opacity-0 max-h-0 overflow-hidden transition-all duration-500 group-hover:opacity-100 group-hover:max-h-28 line-clamp-4"
+                    style={{ transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)" }}
+                  >
+                    {game.description}
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+          {allGames.length === 0 && (
+            <p className="text-gray-500 col-span-full">Bu kategoride oyun bulunamadı.</p>
+          )}
+        </div>
+      </div>
       <div className="space-y-6 mt-12">
         <Title title1={"Topluluk"} title2={'İçeriği'} />
 

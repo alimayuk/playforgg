@@ -26,12 +26,12 @@ export default function Navbar() {
     {
       title: "E-spor",
       children: [
-        { title: "Maçlar", link: "/esports/matches" },
-        { title: "Turnuvalar", link: "/esports/tournaments" },
+        // { title: "Maçlar", link: "/esports/matches" },
+        // { title: "Turnuvalar", link: "/esports/tournaments" },
         { title: "Haberler", link: "/esports/news" },
-        {
-          title: "Takımlar",
-        },
+        // {
+        //   title: "Takımlar",
+        // },
       ],
     },
     // {

@@ -77,9 +77,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: <a className="text-inherit" href="/admin">Ana Sayfa</a>,
     },
     {
-      key: "/admin/technologies",
+      key: "/admin/blogs",
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href="/admin/technologies">Teknolojiler</a>,
+      label: <a className="text-inherit" href="/admin/blogs">Bloglar</a>,
     },
     {
       key: "/admin/categories",
