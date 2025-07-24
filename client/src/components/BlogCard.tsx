@@ -31,10 +31,10 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
       {/* Alt içerik */}
       <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 bg-gradient-to-t from-gray-900/90 to-transparent rounded-b-xl flex flex-col">
         {/* Başlık */}
-        <h3 className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-6">
-          {post.title}
-        </h3>
-
+        <div className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 space-y-1">
+          <h3>{post.title}</h3>
+        <p className="text-gray-400 text-sm">Ali Mayuk</p>
+        </div>
         {/* Tarih ve link */}
         <div
           className="flex items-center justify-between mt-1 opacity-0 max-h-0 overflow-hidden transition-all duration-500 group-hover:opacity-100 group-hover:max-h-10"

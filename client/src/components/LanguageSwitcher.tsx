@@ -1,5 +1,6 @@
 'use client';
 
+import { UsersService } from '@/customServices/users.service';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 
@@ -14,6 +15,11 @@ interface DropdownProps {
 }
 
 export default function Navbar() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [password_confirmation, setpassword_confirmation] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const menuData: MenuItem[] = [
     {
       title: "Sana Özel",
@@ -60,6 +66,31 @@ export default function Navbar() {
   ];
   const [modalType, setModalType] = useState<'login' | 'register' | null>(null);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== password_confirmation) {
+      setError("Şifreler eşleşmiyor!");
+      return;
+    }
+    try {
+      const res = await UsersService.register({
+        username,
+        email,
+        password,
+        password_confirmation,
+      });
+      console.log("Kayıt başarılı:", res);
+      alert("Kayıt başarılı! Giriş yapabilirsiniz.");
+      setEmail('');
+      setPassword('');
+      setUsername('');
+      setpassword_confirmation('');
+      setModalType('login');
+    } catch (error) {
+      setError("Kayıt sırasında bir hata oluştu.");
+    }
+  };
+
   return (
     <header>
       <nav className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between bg-gray-900 text-white shadow-xl rounded-xl my-5 relative">
@@ -102,7 +133,7 @@ export default function Navbar() {
             {modalType === 'login' ? (
               <>
                 <h2 className="text-2xl font-bold mb-4 text-center text-black">Giriş Yap</h2>
-                <form className="space-y-4">
+                <form className="space-y-4 text-black">
                   <input
                     type="email"
                     placeholder="Kullanıcı Adı"
@@ -133,30 +164,42 @@ export default function Navbar() {
             ) : (
               <>
                 <h2 className="text-2xl font-bold mb-4 text-center text-black">Kayıt Ol</h2>
-                <form className="space-y-4">
+                <form className="space-y-4 text-black" >
                   <input
+                    name='username'
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     type="text"
                     placeholder="Kullanıcı Adı  "
                     className="w-full border border-gray-300 p-2 rounded"
                   />
                   <input
                     type="email"
+                    name='email'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="E-posta"
                     className="w-full border border-gray-300 p-2 rounded"
                   />
                   <input
                     type="password"
+                    name='password'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Şifre"
                     className="w-full border border-gray-300 p-2 rounded"
                   />
                   <input
                     type="password"
+                    name='password_confirmation'
+                    value={password_confirmation}
+                    onChange={(e) => setpassword_confirmation(e.target.value)}
                     placeholder="Şifre Tekrar"
                     className="w-full border border-gray-300 p-2 rounded"
                   />
                   <button
-                    type="submit"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded"
+                    type="button"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded" onClick={handleSubmit}
                   >
                     Kayıt Ol
                   </button>

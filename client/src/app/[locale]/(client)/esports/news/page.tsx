@@ -7,6 +7,7 @@ const newsList = [
     {
         slug: 'league-of-legends-worlds-2025',
         title: 'League of Legends Dünya Şampiyonası 2025',
+        author: 'Ahmet Y.',
         image: '/images/insta3.jpg',
         summary: 'PlayForGG ve Team Hydra arasında kıyasıya bir mücadele bekleniyor.',
         date: '2025-07-04',
@@ -16,6 +17,7 @@ const newsList = [
     {
         slug: 'valorant-patch',
         title: 'Valorant Yeni Güncellemesi Yayında!',
+        author: 'Mehmet K.',
         image: '/images/i.webp',
         summary: 'Yeni ajan ve harita değişiklikleri oyunu değiştirebilir.',
         date: '2025-07-03',
@@ -25,6 +27,7 @@ const newsList = [
     {
         slug: 'harita-degisiklikleri',
         title: 'CS2 Harita Değişiklikleri',
+        author: 'Ahmet Y.',
         image: '/images/xx.png',
         summary: 'Takımlarda büyük değişiklikler yapıldı, yeni sezon öncesi dengeler değişiyor.',
         date: '2025-07-05',
@@ -34,6 +37,7 @@ const newsList = [
     {
         slug: 'valorant-turnuva-basliyor',
         title: 'Valorant Turnuvası Bu Hafta Başlıyor!',
+        author: 'Mehmet K.',
         image: '/images/insta2.webp',
         summary: 'Büyük ödüllerin olduğu turnuva rekabeti artıracak.',
         date: '2025-07-06',
@@ -43,6 +47,7 @@ const newsList = [
     {
         slug: 'cs2-yeni-guncelleme',
         title: 'CS2 Yeni Güncelleme Detayları',
+        author: 'Ahmet Y.',
         image: '/images/insta1.webp',
         summary: 'Harita ve silah dengeleri güncellendi, oyuncular yeniliklere adapte olmaya çalışıyor.',
         date: '2025-07-07',
@@ -52,6 +57,7 @@ const newsList = [
     {
         slug: 'valorant-strateji-rehberi',
         title: 'Valorant İçin Strateji Rehberi',
+        author: 'Mehmet K.',
         image: '/images/insta2.webp',
         summary: 'Yeni başlayanlar ve deneyimli oyuncular için taktikler.',
         date: '2025-07-08',
@@ -61,6 +67,7 @@ const newsList = [
     {
         slug: 'esports-etkinlikleri-2025',
         title: '2025 Espor Etkinlik Takvimi',
+        author: 'Ahmet Y.',
         image: '/images/i.webp',
         summary: 'Bu yıl gerçekleşecek önemli espor etkinlikleri ve tarihleri.',
         date: '2025-07-09',
@@ -135,7 +142,8 @@ export default function NewsPage() {
                         </div>
                         <div className="p-4">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{news.title}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{news.summary}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-1">{news.summary}</p>
+                            <p className="text-sm text-gray-600 dark:text-orange-600 mt-1">{news.author}</p>
                             <span className="text-xs text-gray-400 mt-2 block">{news.date}</span>
                         </div>
                     </div>

@@ -13,6 +13,8 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, HasRoles;
 
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
     // JWT için gereken metodlar 👇
     public function getJWTIdentifier()
     {

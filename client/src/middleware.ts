@@ -4,7 +4,7 @@ import { locales, defaultLocale } from './i18n/i18n';
 import { verifyJwtToken } from './app/lib/jwtToken';
 
 const AUTH_PAGES = ['login', 'register'];
-const PROTECTED_PATHS = ['dasdada']; // gerçek korumalı path'leri buraya ekle
+const PROTECTED_PATHS = ['admin']; // gerçek korumalı path'leri buraya ekle
 
 const intlMiddleware = createIntlMiddleware({
   defaultLocale,

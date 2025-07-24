@@ -3,14 +3,14 @@ import { getJwtSecretKey } from "../app/lib/jwtToken";
 import Cookies from 'js-cookie';
 
 interface User {
-  name: string;
+  username: string;
   email: string;
 }
 
 export const jwtTokenCreate = async (user: User): Promise<void> => {
   try {
     const token = await new SignJWT({
-      name: user.name,
+      username: user.username,
       email: user.email,
     })
       .setProtectedHeader({ alg: "HS256" })

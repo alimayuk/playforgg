@@ -461,7 +461,7 @@ export default function HomePage() {
         </div>
       </div> */}
       <div className='space-y-6 mt-12'>
-        <Title title1={"Tüm"} title2={'Gönderiler'} />
+        <Title title1={"Tüm"} title2={'Bloglar'} />
         <div className="mt-12 p-6 w-full grid grid-cols-1 sm:grid-cols-3 gap-8">
           {posts.map((post) => (
             <BlogCard key={post.id} post={post} />

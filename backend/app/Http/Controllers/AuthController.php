@@ -12,18 +12,18 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string',
+            'username' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6'
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
+            'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
         ]);
 
-        $user->assignRole('user'); // Varsayılan rol
+        // $user->assignRole('user'); // Varsayılan rol
 
         return response()->json(['message' => 'Kayıt başarılı']);
     }
@@ -31,15 +31,23 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('username', 'password');
 
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['status' => 'error', 'message' => 'Geçersiz bilgiler'], 401);
         }
 
         return response()->json([
+            'status' => 'success',
             'token' => $token,
-            'user' => auth()->user()
+            'user' => [
+                'id' => auth()->user()->id,
+                'username' => auth()->user()->username,
+                'email' => auth()->user()->email,
+                'roles' => auth()->user()->roles, // Kullanıcının rolleri
+                'created_at' => auth()->user()->created_at,
+                'updated_at' => auth()->user()->updated_at,
+            ]
         ]);
     }
 

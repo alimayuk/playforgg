@@ -39,10 +39,10 @@ export default function GamesPage() {
         },
         {
             id: 5,
-            title: 'Bullet Rush',
+            title: 'Grand Theft Auto V',
             category: 'Aksiyon',
-            image: 'https://picsum.photos/400/200?random=5',
-            description: 'Reflekslerini konuştur!',
+            image: 'https://upload.wikimedia.org/wikipedia/tr/b/be/Grand_Theft_Auto_V_oyununun_kapa%C4%9F%C4%B1.jpg',
+            description: 'Açık dünya aksiyon macera oyunu. GTA serisinin en yeni oyunu. Çeşitli görevler, araçlar ve karakterlerle dolu. Los Santos şehrinde suç dünyasında yüksel.',
         },
     ];
 
@@ -96,9 +96,10 @@ export default function GamesPage() {
                             {/* Alt içerik container */}
                             <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 bg-gradient-to-t from-gray-900/90 to-transparent rounded-b-xl flex flex-col">
                                 {/* Başlık */}
-                                <h3 className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 line-clamp-3">
-                                    {game.title}
-                                </h3>
+                                <div className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 space-y-1">
+                                    <h3 className='line-clamp-3'>{game.title}</h3>
+                                    <p className="text-gray-400 text-sm">Ali Mayuk</p>
+                                </div>
 
                                 {/* Açıklama */}
                                 <div

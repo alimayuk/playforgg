@@ -7,10 +7,10 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 const images = [
-    '/images/a.png',
-    '/images/b.jpg',
-    '/images/c.jpg',
-    '/images/d.jpg',
+    'https://cdn.akamai.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg',
+    'https://gamizm.com/wp-content/uploads/league-of-legends-banner.jpg',
+    'https://img.redbull.com/images/c_limit,w_1500,h_1000/f_auto,q_auto/redbullcom/2022/8/6/vafqutbzwfig41ybxze7/fut-esports-valorant',
+    'https://egw.news/uploads/news/1/17/1741939626030_1741939626030.webp',
 ];
 
 export default function ImageSwiper() {
