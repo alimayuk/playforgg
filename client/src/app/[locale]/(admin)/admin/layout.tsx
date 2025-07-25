@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
+  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UploadOutlined,
@@ -10,6 +11,9 @@ import { Avatar, Badge, Button, Drawer, Layout, Menu, theme } from "antd";
 import { usePathname } from "next/navigation";
 import { deleteCookie, getCookie } from "cookies-next";
 import { useUserStore } from "@/stores/userStore";
+import '../../../globals.css';
+import LoadingScreen from "@/components/LoadingScreen";
+
 const { Header, Content } = Layout;
 type MenuItem = {
   key: string;
@@ -94,7 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       icon: <UploadOutlined />,
       label: <a className="text-inherit" href={`/${locale}/admin/portfolios`}>Portföyler</a>,
     },
-    ...(user?.roles?.includes("writer")
+    ...(user?.roles?.includes("admin")
       ? [(
         {
           key: `/${locale}/admin/settings`,
@@ -102,6 +106,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           label: <a className="text-inherit" href={`/${locale}/admin/settings`}>Ayarlar</a>,
         }
       )] : []),
+    ...(user ? [
+      {
+        key: `/${locale}/admin/logout`,
+        icon: <LogoutOutlined />,
+        label: (
+          <a className="text-inherit" href={`/${locale}/admin/logout`}>
+            Çıkış Yap
+          </a>
+        ),
+      }
+    ] : []),
   ];
 
   // Menü seviyeleri
@@ -138,6 +153,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setStateOpenKeys(openKeys);
     }
   };
+
+  if (!user) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Layout>
