@@ -18,7 +18,7 @@ export const jwtTokenCreate = async (user: User): Promise<void> => {
       .setExpirationTime("30m")
       .sign(getJwtSecretKey());
 
-    Cookies.set("token", token, { path: "/" });
+    Cookies.set("c", token, { path: "/" });
   } catch (error) {
     console.error("Error creating JWT:", error);
   }

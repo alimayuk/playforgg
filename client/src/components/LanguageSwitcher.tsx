@@ -109,12 +109,12 @@ export default function Navbar() {
           <div className="h-6 w-px bg-gray-600 hidden sm:block" />
 
           {/* Oturum Aç butonu */}
-          <button
-            onClick={() => setModalType('login')}
-            className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm font-semibold hover:bg-orange-600 transition"
-          >
-            Oturum Aç
-          </button>
+            <button
+              onClick={() => setModalType('login')}
+              className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm font-semibold hover:bg-orange-600 transition"
+            >
+              Oturum Aç
+            </button>
         </div>
 
       </nav>

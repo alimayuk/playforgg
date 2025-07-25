@@ -74,6 +74,7 @@ export const UsersService = {
       `${process.env.NEXT_PUBLIC_SERVER_URL}/login`,
       {
         method: "POST",
+        credentials: "include",
         body: JSON.stringify(information),
       }
     );

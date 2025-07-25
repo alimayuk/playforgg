@@ -39,7 +39,6 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'token' => $token,
             'user' => [
                 'id' => auth()->user()->id,
                 'username' => auth()->user()->username,
@@ -48,16 +47,27 @@ class AuthController extends Controller
                 'created_at' => auth()->user()->created_at,
                 'updated_at' => auth()->user()->updated_at,
             ]
-        ]);
+        ])->cookie(
+            'token',
+            $token,
+            60 * 24 * 7,
+            '/',    // path
+            null,   // domain
+            true,   // secure (HTTPS zorunlu)
+            true    // httpOnly
+        );
     }
 
     public function me()
     {
-        if (!auth()->user()) {
-            return response()->json(['status' => 'error', 'message' => 'Kullanıcı oturumu açık değil'], 401);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json(['status' => 'success', 'user' => $user]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
-        return response()->json(auth()->user());
     }
+
 
     public function logout()
     {

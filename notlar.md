@@ -17,7 +17,7 @@ yorum sistemi tek hale getirilecek.
 
 ***************************YAPILANLAR**********************************
 
-
+cookie c = admine geçiş için anahtar
 
 ***************************ERTELENENLER**********************************
 **canlı yayın platformları ertelendi

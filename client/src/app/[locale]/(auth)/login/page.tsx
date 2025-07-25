@@ -6,11 +6,9 @@ import { UsersService } from '@/customServices/users.service';
 import { jwtTokenCreate } from '@/utils/jwtTokenCreate';
 
 const LoginPage = () => {
-  const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('123123asd');
   const [error, setError] = useState<string | null>(null);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -18,8 +16,8 @@ const LoginPage = () => {
       if (res.status === 'success' && res.user) {
         await jwtTokenCreate(res.user);
         const urlParams = new URLSearchParams(window.location.search);
-        const nextPath = urlParams.get("next") || "/admin"; // Eğer next parametresi varsa ona git, yoksa /admin
-        window.location.href = nextPath; // Başarılı girişten sonra yönlendirme yap
+        const nextPath = urlParams.get("next") || "/admin";
+        window.location.href = nextPath;
       } else {
         setError('Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
       }

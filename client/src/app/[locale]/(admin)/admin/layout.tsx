@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UploadOutlined,
@@ -10,9 +9,8 @@ import {
 import { Avatar, Badge, Button, Drawer, Layout, Menu, theme } from "antd";
 import { usePathname } from "next/navigation";
 import { deleteCookie, getCookie } from "cookies-next";
-
+import { useUserStore } from "@/stores/userStore";
 const { Header, Content } = Layout;
-
 type MenuItem = {
   key: string;
   children?: MenuItem[];
@@ -29,9 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [stateOpenKeys, setStateOpenKeys] = useState<string[]>([]);
-
   const pathname = usePathname();
-
+  const user = useUserStore((s) => s.user);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -97,16 +94,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       icon: <UploadOutlined />,
       label: <a className="text-inherit" href={`/${locale}/admin/portfolios`}>Portföyler</a>,
     },
-    {
-      key: `/${locale}/admin/settings`,
-      icon: <UploadOutlined />,
-      label: <a className="text-inherit" href={`/${locale}/admin/settings`}>Ayarlar</a>,
-    },
-    {
-      key: "logout",
-      icon: <LogoutOutlined />,
-      label: <div className="text-inherit" onClick={handleLogout}>Çıkış Yap</div>,
-    },
+    ...(user?.roles?.includes("writer")
+      ? [(
+        {
+          key: `/${locale}/admin/settings`,
+          icon: <UploadOutlined />,
+          label: <a className="text-inherit" href={`/${locale}/admin/settings`}>Ayarlar</a>,
+        }
+      )] : []),
   ];
 
   // Menü seviyeleri

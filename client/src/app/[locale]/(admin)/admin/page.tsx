@@ -1,5 +1,7 @@
 'use client';
 
+import { useUserStore } from '@/stores/userStore';
+import React from 'react'
 // import { useEffect, useState } from 'react';
 // import { Card, Input, Button, Table, Checkbox, Modal, message } from 'antd';
 // import type { ColumnsType } from 'antd/es/table';
@@ -143,11 +145,13 @@
 //     </div>
 //   );
 // }
-import React from 'react'
-
 const page = () => {
+  const user = useUserStore((s) => s.user);
   return (
-    <div>page</div>
+    <div>
+      <h1>Admin Panel</h1>
+      <p>Kullanıcı: {user?.username || 'Bulunamadı'}</p>
+    </div>
   )
 }
 

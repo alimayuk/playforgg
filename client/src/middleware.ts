@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
 
   // ✅ Auth ve koruma kontrolleri
   const pathWithoutLocale = pathname.slice(locale.length + 1) || '/';
-  const token = request.cookies.get('token')?.value ?? null;
+  const token = request.cookies.get('c')?.value ?? null;
   const hasVerifiedToken = token && (await verifyJwtToken(token));
 
   const isAuthPage = AUTH_PAGES.some((page) =>
@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   if (isAuthPage) {
     if (!hasVerifiedToken) {
       const response = NextResponse.next();
-      response.cookies.delete('token');
+      response.cookies.delete('c');
       return response;
     }
     return NextResponse.redirect(new URL(`/${locale}`, request.url));
@@ -68,6 +68,7 @@ export async function middleware(request: NextRequest) {
       request.url
     );
     const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete('c');
     response.cookies.delete('token');
     return response;
   }

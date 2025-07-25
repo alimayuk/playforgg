@@ -2,9 +2,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import ImageSwiper from '@/components/ImageSwiper';
 import { BookOpen, CalendarDays, Gamepad, MessagesSquare, Tv, TvMinimalPlay } from 'lucide-react';
-import Footer from '@/components/Footer';
 import Title from '@/components/Title';
-import MatchCard from '@/components/MatchCard';
 import BlogCard from '@/components/BlogCard';
 
 const categories = [
