@@ -191,6 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             items={menuItems}
             openKeys={stateOpenKeys}
             onOpenChange={onOpenChange}
+            style={{ height: "100%", borderRight: 0 }}
           />
         </Drawer>
       )}

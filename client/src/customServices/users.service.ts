@@ -6,7 +6,6 @@ interface User {
   email: string;
   password?: string;
   password_confirmation?: string;
-  // Dilersen role, phone gibi alanları da ekleyebilirsin
 }
 
 interface LoginCredentials {
@@ -33,7 +32,7 @@ const fetchWithAuth = async <T = any>(
   };
 
   try {
-    const response = await fetch(url, { ...options, headers });
+    const response = await fetch(url, { ...options, headers, credentials: "include" });
     if (!response.ok) {
       const errorData = await response.json();
       throw errorData;
@@ -55,7 +54,7 @@ const fetchWithoutAuth = async <T = any>(
   };
 
   try {
-    const response = await fetch(url, { ...options, headers });
+    const response = await fetch(url, { ...options, headers, credentials: "include" });
     if (!response.ok) {
       const errorData = await response.json();
       throw errorData;
@@ -67,20 +66,17 @@ const fetchWithoutAuth = async <T = any>(
 };
 
 export const UsersService = {
-  // 🔐 Kullanıcı Girişi (Login)
+
   login: async (information: LoginCredentials): Promise<AuthResponse> => {
-    console.log("Logging in with:", information);
     return fetchWithoutAuth<AuthResponse>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/login`,
       {
         method: "POST",
-        credentials: "include",
         body: JSON.stringify(information),
       }
     );
   },
 
-  // 🆕 Kullanıcı Kaydı (Register)
   register: async (values: User): Promise<AuthResponse> => {
     return fetchWithoutAuth<AuthResponse>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/register`,
@@ -91,7 +87,6 @@ export const UsersService = {
     );
   },
 
-  // 📋 Tüm kullanıcıları getir
   getUsers: async (token?: string): Promise<User[]> => {
     return fetchWithAuth<User[]>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users`,
@@ -99,13 +94,12 @@ export const UsersService = {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
-        },
+        }, // gereksiz çünkü zaten cookie ile gönderiliyor
         cache: "no-store",
       }
     );
   },
 
-  // ➕ Yeni kullanıcı oluştur
   createUser: async (values: User): Promise<User> => {
     return fetchWithAuth<User>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users`,
@@ -116,7 +110,6 @@ export const UsersService = {
     );
   },
 
-  // ✏️ Kullanıcı güncelle
   updateUser: async (values: Partial<User>, id: number): Promise<User> => {
     return fetchWithAuth<User>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users/${id}`,
@@ -127,7 +120,6 @@ export const UsersService = {
     );
   },
 
-  // ❌ Kullanıcı sil
   deleteUser: async (id: number): Promise<{ message: string }> => {
     return fetchWithAuth<{ message: string }>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users/${id}`,

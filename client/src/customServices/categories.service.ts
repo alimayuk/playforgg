@@ -5,7 +5,7 @@ interface FetchOptions extends RequestInit {
 }
 
 const getLocale = (): string => {
-    return getCookie("NEXT_LOCALE")?.toString() || "tr"; // varsayılan tr
+    return getCookie("NEXT_LOCALE")?.toString() || "tr";
 };
 
 const fetchWithAuth = async <T = any>(
@@ -15,7 +15,6 @@ const fetchWithAuth = async <T = any>(
     const headers: HeadersInit = {
         Accept: "application/json",
         "Content-Type": "application/json",
-        credentials: "include", // Cookie gönderilsin
         ...options.headers,
     };
 
@@ -23,7 +22,7 @@ const fetchWithAuth = async <T = any>(
         const response = await fetch(url, {
             ...options,
             headers,
-            credentials: "include", // Cookie gönderilsin
+            credentials: "include",
         });
         if (!response.ok) {
             const errorData = await response.json();
@@ -46,10 +45,16 @@ export interface Category {
 }
 
 export const CategoriesService = {
-    getCategories: async (): Promise<{ data: Category[]; status: boolean }> => {
-        const locale = getLocale();
-        const data = await fetchWithAuth<Category[]>(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${locale}`,
+    getCategories: async (
+        locale: string = "tr",
+        page: number = 1,
+        per_page: number = 5
+    ): Promise<{ data: Category[]; status: boolean; meta?: any }> => {
+        const queryLocale = locale && locale !== "hepsi" ? `${locale}&` : "hepsi&";
+        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${queryLocale}page=${page}&per_page=${per_page}`;
+
+        const data = await fetchWithAuth<{ data: Category[]; status: boolean; meta?: any }>(
+            url,
             {
                 method: "GET",
                 cache: "no-store",
@@ -57,19 +62,27 @@ export const CategoriesService = {
             }
         );
 
-        return {
-            data,
-            status: true,
-        };
+        return data;
     },
 
-    createCategory: async (values: Record<string, any>): Promise<Category> => {
-        const locale = getLocale();
-        return fetchWithAuth<Category>(
+    getAllByLocale: async (locale: string): Promise<Category[]> => {
+        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${locale}&per_page=9999`;
+
+        const data = await fetchWithAuth<{ data: Category[] }>(url, {
+            method: "GET",
+            cache: "no-store",
+            credentials: "include",
+        });
+
+        return data.data;
+    },
+
+    createCategory: async (values: Record<string, any>): Promise<{ data: Category }> => {
+        return fetchWithAuth<{ data: Category }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/categories`,
             {
                 method: "POST",
-                body: JSON.stringify({ ...values, locale }),
+                body: JSON.stringify({ ...values}),
             }
         );
     },
@@ -77,13 +90,12 @@ export const CategoriesService = {
     updateCategory: async (
         values: Record<string, any>,
         id: number
-    ): Promise<Category> => {
-        const locale = getLocale();
-        return fetchWithAuth<Category>(
+    ): Promise<{ data: Category }> => {
+        return fetchWithAuth<{ data: Category }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/categories/${id}`,
             {
                 method: "PUT",
-                body: JSON.stringify({ ...values, locale }),
+                body: JSON.stringify({ ...values}),
             }
         );
     },
@@ -98,3 +110,4 @@ export const CategoriesService = {
         );
     },
 };
+

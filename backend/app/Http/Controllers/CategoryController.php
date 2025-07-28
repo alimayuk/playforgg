@@ -11,13 +11,37 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $locale = $request->get('locale', 'tr');
+        $perPage = (int) $request->get('per_page', 5); // Varsayılan 5
 
-        $categories = Category::where('locale', $locale)->get();
+        $query = Category::query();
+
+        if ($locale !== 'hepsi') {
+            $query->where('locale', $locale);
+        }
+
+        $query->select([
+            'id',
+            'parent_id',
+            'title',
+            'slug',
+            'status',
+            'featured',
+            'locale',
+            'created_at', // Sıralama için gerekli
+        ])->orderBy('created_at', 'desc'); // Yeniden eskiye doğru sıralama
+
+        $categories = $query->paginate($perPage);
 
         return response()->json([
-            "data" => $categories,
-            "status" => true
-        ], 200);
+            'data' => $categories->items(),
+            'status' => true,
+            'meta' => [
+                'current_page' => $categories->currentPage(),
+                'last_page' => $categories->lastPage(),
+                'per_page' => $categories->perPage(),
+                'total' => $categories->total(),
+            ]
+        ]);
     }
 
     public function store(Request $request)
@@ -40,6 +64,9 @@ class CategoryController extends Controller
 
         if (!$request->slug) {
             $data['slug'] = Str::slug($request->title);
+            if (Category::where('slug', $data['slug'])->exists()) {
+                $data['slug'] .= '-' . Str::random(5); // Benzersiz hale getirmek için rastgele bir ek ekle
+            }
         }
 
         $category = Category::create($data);
@@ -84,9 +111,7 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $locale = $request->get('locale', 'tr');
-
-        $category = Category::where('id', $id)->where('locale', $locale)->first();
+        $category = Category::find($id);
 
         if (!$category) {
             return response()->json(['status' => 'error', 'message' => 'Kategori bulunamadı!'], 404);

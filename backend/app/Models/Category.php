@@ -31,4 +31,15 @@ class Category extends Model
     // {
     //     return $this->hasMany(Blog::class);
     // }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($category) {
+            foreach ($category->children as $child) {
+                $child->delete(); // bu da deleting tetikleyerek alt çocuklarını da siler
+            }
+        });
+    }
 }

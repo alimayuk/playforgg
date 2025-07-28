@@ -2,9 +2,13 @@ import Categories from '@/components/adminPages/Categories';
 import { cookies } from 'next/headers';
 
 const fetchCategories = async () => {
-  const token = cookies().get('token')?.value;
+  const cookieStore = cookies();
+  const token = cookieStore.get('token')?.value;
+  const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/categories`, {
+  console.log(`Fetching categories for locale: ${locale}`);
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${locale}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
@@ -15,6 +19,7 @@ const fetchCategories = async () => {
   if (!res.ok) {
     throw new Error('Kategori alınamadı');
   }
+
   return res.json();
 };
 
