@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
@@ -37,9 +38,19 @@ class Category extends Model
         parent::boot();
 
         static::deleting(function ($category) {
+            static::deleteModelImages($category);
             foreach ($category->children as $child) {
-                $child->delete(); // bu da deleting tetikleyerek alt çocuklarını da siler
+                $child->delete();
             }
         });
+    }
+
+    protected static function deleteModelImages($model)
+    {
+        foreach (['image', 'icon'] as $field) {
+            if (!empty($model->$field)) {
+                ImageService::deleteImage($model->$field);
+            }
+        }
     }
 }

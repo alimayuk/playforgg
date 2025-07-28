@@ -12,11 +12,13 @@ const fetchWithAuth = async <T = any>(
     url: string,
     options: RequestInit = {}
 ): Promise<T> => {
-    const headers: HeadersInit = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        ...options.headers,
-    };
+    
+    const headers = new Headers(options.headers);
+
+    
+    if (options.body && !(options.body instanceof FormData)) {
+        headers.set("Content-Type", "application/json");
+    }
 
     try {
         const response = await fetch(url, {
@@ -24,6 +26,7 @@ const fetchWithAuth = async <T = any>(
             headers,
             credentials: "include",
         });
+
         if (!response.ok) {
             const errorData = await response.json();
             throw errorData;
@@ -34,8 +37,6 @@ const fetchWithAuth = async <T = any>(
     }
 };
 
-
-
 export interface Category {
     id: number;
     title: string;
@@ -45,13 +46,15 @@ export interface Category {
 }
 
 export const CategoriesService = {
+
     getCategories: async (
         locale: string = "tr",
         page: number = 1,
         per_page: number = 5
     ): Promise<{ data: Category[]; status: boolean; meta?: any }> => {
-        const queryLocale = locale && locale !== "hepsi" ? `${locale}&` : "hepsi&";
-        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${queryLocale}page=${page}&per_page=${per_page}`;
+        
+        const queryLocale = locale && locale !== "hepsi" ? locale : "hepsi";
+        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${queryLocale}&page=${page}&per_page=${per_page}`;
 
         const data = await fetchWithAuth<{ data: Category[]; status: boolean; meta?: any }>(
             url,
@@ -78,11 +81,14 @@ export const CategoriesService = {
     },
 
     createCategory: async (values: Record<string, any>): Promise<{ data: Category }> => {
+        
+        const isFormData = values instanceof FormData;
+
         return fetchWithAuth<{ data: Category }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/categories`,
             {
                 method: "POST",
-                body: JSON.stringify({ ...values}),
+                body: isFormData ? values : JSON.stringify(values),
             }
         );
     },
@@ -91,11 +97,17 @@ export const CategoriesService = {
         values: Record<string, any>,
         id: number
     ): Promise<{ data: Category }> => {
+        const isFormData = values instanceof FormData;
+
+        if (isFormData) {
+            values.append("_method", "PUT"); 
+        }
+
         return fetchWithAuth<{ data: Category }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/categories/${id}`,
             {
-                method: "PUT",
-                body: JSON.stringify({ ...values}),
+                method: isFormData ? "POST" : "PUT",
+                body: isFormData ? values : JSON.stringify(values),
             }
         );
     },
@@ -110,4 +122,3 @@ export const CategoriesService = {
         );
     },
 };
-

@@ -6,21 +6,30 @@ import {
   Checkbox,
   Drawer,
   Form,
+  Image,
   Input,
   Popconfirm,
   Select,
   Table,
+  Tag,
   Typography,
+  Upload,
   message,
 } from "antd";
 import {
+  CheckOutlined,
+  CloseOutlined,
   DeleteOutlined,
   EditOutlined,
+  InboxOutlined,
   PlusOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { CategoriesService, Category } from "@/customServices/categories.service";
 import type { ColumnsType } from "antd/es/table";
 import { getCookie } from "cookies-next";
+import Dragger from "antd/es/upload/Dragger";
+import { GeneralService } from "@/customServices/general.service";
 
 const { Title } = Typography;
 
@@ -30,7 +39,12 @@ interface Props {
     status: boolean;
   };
 }
-
+const normFile = (e: any) => {
+  if (Array.isArray(e)) {
+    return e;
+  }
+  return e?.fileList;
+};
 const Categories: React.FC<Props> = ({ cats }) => {
   const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
 
@@ -42,9 +56,10 @@ const Categories: React.FC<Props> = ({ cats }) => {
   const [localeFilter, setLocaleFilter] = useState<string>(locale);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 5, total: 0 });
   const [allLocaleCategories, setAllLocaleCategories] = useState<Category[]>([]);
+  const [imageRemoved, setImageRemoved] = useState(false);
+  const [iconRemoved, setIconRemoved] = useState(false);
 
   const handleLocaleChange = async (value: string) => {
-    // form.setFieldValue("locale", value); // <-- bunu kaldır
     if (value) {
       const allCats = await CategoriesService.getAllByLocale(value);
       setAllLocaleCategories(allCats);
@@ -54,6 +69,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
   useEffect(() => {
     fetchFilteredCategories();
   }, [localeFilter, pagination.current, pagination.pageSize]);
+
   const fetchFilteredCategories = async () => {
     try {
       setLoading(true);
@@ -75,7 +91,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
       setLoading(false);
     }
   };
-  // Üst kategorileri sadece locale değiştiğinde getir
+
   useEffect(() => {
     const fetchAllCats = async () => {
       try {
@@ -89,7 +105,6 @@ const Categories: React.FC<Props> = ({ cats }) => {
     fetchAllCats();
   }, [localeFilter]);
 
-
   const handleTableChange = (paginationData: any) => {
     setPagination({
       ...pagination,
@@ -98,25 +113,12 @@ const Categories: React.FC<Props> = ({ cats }) => {
     });
   };
 
-  const showDrawer = (category?: Category) => {
-    if (!category) {
-      const drawerLocale =
-        localeFilter === "hepsi"
-          ? getCookie("NEXT_LOCALE")?.toString() || "tr"
-          : localeFilter;
-
-      form.setFieldsValue({ locale: drawerLocale });
-      handleLocaleChange(drawerLocale);
-    }
-    setDrawerOpen(true);
-  };
-
-
-
   const closeDrawer = () => {
     setDrawerOpen(false);
     setEditingCategory(null);
     form.resetFields();
+    setImageRemoved(false);
+    setIconRemoved(false);
   };
 
   const getParentTitle = (parent_id: number | null): string => {
@@ -127,23 +129,50 @@ const Categories: React.FC<Props> = ({ cats }) => {
 
 
   const submitContent = async (values: any) => {
-
     if (loading) return;
 
     try {
       setLoading(true);
 
+      const formData = new FormData();
+
+      formData.append("title", values.title);
+      formData.append("locale", values.locale);
+      formData.append("parent_id", values.parent_id || "");
+      formData.append("featured", values.featured ? "1" : "0");
+      formData.append("status", values.status ? "1" : "0");
+
+      if (
+        values.image &&
+        values.image.length > 0 &&
+        values.image[0].originFileObj
+      ) {
+        formData.append("image", values.image[0].originFileObj);
+      }
+
+      if (
+        values.icon &&
+        values.icon.length > 0 &&
+        values.icon[0].originFileObj
+      ) {
+        formData.append("icon", values.icon[0].originFileObj);
+      }
+
+
       if (editingCategory) {
-        const updatedCategory = await CategoriesService.updateCategory(values, editingCategory.id);
+        formData.append("remove_image", imageRemoved ? "1" : "0");
+        formData.append("remove_icon", iconRemoved ? "1" : "0");
+        const updatedCategory = await CategoriesService.updateCategory(formData, editingCategory.id);
         setCategories((prev) =>
           prev.map((cat) =>
             cat.id === editingCategory.id ? { ...cat, ...updatedCategory.data } : cat
           )
         );
+        await fetchFilteredCategories(); // listeyi yenile
         message.success("Kategori güncellendi.");
       } else {
-        await CategoriesService.createCategory({ ...values });
-        await fetchFilteredCategories(); // listeyi yenile
+        await CategoriesService.createCategory(formData);
+        await fetchFilteredCategories();
         message.success("Kategori oluşturuldu.");
       }
 
@@ -159,7 +188,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
     try {
       await CategoriesService.deleteCategory(id);
       setCategories((prev) => prev.filter((item) => item.id !== id));
-      await fetchFilteredCategories(); // listeyi yenile
+      await fetchFilteredCategories();
       message.success("Kategori silindi.");
     } catch (error: any) {
       message.error(error?.message || "Silme sırasında hata oluştu.");
@@ -168,10 +197,56 @@ const Categories: React.FC<Props> = ({ cats }) => {
 
   const editCategory = (category: Category) => {
     setEditingCategory(category);
-    form.setFieldsValue(category);
+    const convertToFileList = (filePath: string | null, name: string) =>
+      filePath
+        ? [
+          {
+            uid: "-1",
+            name: filePath.split("/").pop() || name,
+            status: "done",
+            url: `${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${filePath}`,
+          },
+        ]
+        : [];
+
+    form.setFieldsValue({
+      ...category,
+      image: convertToFileList(category.image, "image"),
+      icon: convertToFileList(category.icon, "icon"),
+    });
     handleLocaleChange(category.locale);
     setDrawerOpen(true);
   };
+
+  const toggleCategoryField = async (category: Category, field: "status" | "featured") => {
+    if (loading) return;
+
+    try {
+      setLoading(true);
+      const updated = await GeneralService.toggleField("category", category.id, field);
+
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.id === category.id ? { ...cat, ...updated.data } : cat
+        )
+      );
+
+      const labels: Record<string, [string, string]> = {
+        status: ["Kategori aktifleştirildi.", "Kategori pasifleştirildi."],
+        featured: ["Kategori öne çıkarıldı.", "Kategori öne çıkarılmadı."],
+      };
+
+      const value = updated.data[field];
+      message.success(value ? labels[field][0] : labels[field][1]);
+
+    } catch (err: any) {
+      message.error("Güncelleme başarısız.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   const maincolumns: ColumnsType<Category> = [
     {
@@ -190,13 +265,78 @@ const Categories: React.FC<Props> = ({ cats }) => {
       key: "parent_id",
       render: (parent_id: number | null) => getParentTitle(parent_id),
     },
-
     {
       title: "Dil",
       dataIndex: "locale",
       key: "locale",
       width: 80,
       render: (text: string) => text.toUpperCase(),
+    },
+    {
+      title: "Görsel",
+      dataIndex: "image",
+      key: "image",
+      render: (image: string | null) => {
+        return image ? (
+          <Image
+            src={`${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${image}`}
+            alt="Kategori görseli"
+            style={{ borderRadius: 4, width: "100%", maxWidth: 50 }}
+          />
+        ) : (
+          <Tag color="red">
+            <CloseOutlined /> Yok
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "İkon",
+      dataIndex: "icon",
+      key: "icon",
+      render: (icon: string | null) => {
+        return icon ? (
+          <Image
+            src={`${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${icon}`}
+            alt="Kategori ikonu"
+            style={{ borderRadius: 4, width: "100%", maxWidth: 50 }}
+          />
+        ) : (
+          <Tag color="red">
+            <CloseOutlined /> Yok
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Öne Çıkan",
+      key: "featured",
+      render: (_, record) => (
+        <Button
+          size="small"
+          type={record.featured ? "primary" : "default"}
+          onClick={() => toggleCategoryField(record, "featured")}
+          loading={loading}
+          icon={record.featured ? <CheckOutlined /> : <CloseOutlined />}
+        >
+          {record.featured ? "Evet" : "Hayır"}
+        </Button>
+      ),
+    },
+    {
+      title: "Durum",
+      key: "status",
+      render: (_, record) => (
+        <Button
+          size="small"
+          type={record.status ? "primary" : "default"}
+          onClick={() => toggleCategoryField(record, "status")}
+          loading={loading}
+          icon={record.status ? <CheckOutlined /> : <CloseOutlined />}
+        >
+          {record.status ? "Aktif" : "Pasif"}
+        </Button>
+      ),
     },
     {
       title: "İşlem",
@@ -206,6 +346,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
           <a
             onClick={() => editCategory(record)}
             style={{ marginRight: 16, cursor: "pointer", fontSize: 20 }}
+            title="Düzenle"
           >
             <EditOutlined />
           </a>
@@ -216,7 +357,10 @@ const Categories: React.FC<Props> = ({ cats }) => {
             okText="Evet"
             cancelText="Hayır"
           >
-            <a style={{ color: "red", cursor: "pointer", fontSize: 20 }}>
+            <a
+              style={{ color: "red", cursor: "pointer", fontSize: 20 }}
+              title="Sil"
+            >
               <DeleteOutlined />
             </a>
           </Popconfirm>
@@ -224,6 +368,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
       ),
     },
   ];
+
 
   return (
     <>
@@ -249,7 +394,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
           value={localeFilter}
           onChange={(val) => {
             setLocaleFilter(val);
-            setPagination((prev) => ({ ...prev, current: 1 })); // sayfayı resetle
+            setPagination((prev) => ({ ...prev, current: 1 })); 
           }}
           style={{ width: 200, marginBottom: 20 }}
         >
@@ -292,8 +437,8 @@ const Categories: React.FC<Props> = ({ cats }) => {
           layout="vertical"
           onFinish={submitContent}
           autoComplete="off"
+          encType="multipart/form-data"
         >
-          {/* Başlık */}
           <Form.Item
             label="Başlık"
             name="title"
@@ -305,7 +450,6 @@ const Categories: React.FC<Props> = ({ cats }) => {
             <Input />
           </Form.Item>
 
-          {/* Dil Seçimi */}
           <Form.Item
             label="Dil"
             name="locale"
@@ -317,8 +461,6 @@ const Categories: React.FC<Props> = ({ cats }) => {
             </Select>
           </Form.Item>
 
-
-          {/* Üst Kategori Seçimi */}
           <Form.Item shouldUpdate>
             {() => {
               const selectedLocale = form.getFieldValue("locale");
@@ -330,7 +472,9 @@ const Categories: React.FC<Props> = ({ cats }) => {
                     disabled={!selectedLocale || loading}
                   >
                     {allLocaleCategories
-                      .filter((cat) => cat.locale === selectedLocale)
+                      .filter(
+                        (cat) => cat.locale === selectedLocale && cat.id !== editingCategory?.id
+                      )
                       .map((cat) => (
                         <Select.Option key={cat.id} value={cat.id}>
                           {cat.title}
@@ -340,6 +484,56 @@ const Categories: React.FC<Props> = ({ cats }) => {
                 </Form.Item>
               );
             }}
+          </Form.Item>
+
+          <Form.Item
+            label="Görsel"
+            name="image"
+            valuePropName="fileList"
+            getValueFromEvent={normFile}
+            extra="Maksimum 1 dosya yükleyebilirsiniz."
+          >
+            <Dragger
+              name="image"
+              multiple={false}
+              beforeUpload={() => false} 
+              accept="image/*"
+              maxCount={1}
+              onRemove={() => {
+                setImageRemoved(true);
+                return true;
+              }}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Dosyayı buraya sürükleyin veya tıklayarak seçin
+              </p>
+            </Dragger>
+          </Form.Item>
+
+          <Form.Item
+            label="İkon"
+            name="icon"
+            valuePropName="fileList"
+            getValueFromEvent={normFile}
+            extra="Maksimum 1 dosya yükleyebilirsiniz. (PNG, SVG vb.)"
+          >
+            <Upload
+              name="icon"
+              multiple={false}
+              beforeUpload={() => false}
+              accept="image/*,image/svg+xml"
+              maxCount={1}
+              listType="picture"
+              onRemove={() => {
+                setIconRemoved(true); 
+                return true;
+              }}
+            >
+              <Button icon={<UploadOutlined />}>İkon Yükle</Button>
+            </Upload>
           </Form.Item>
 
           <Form.Item name="featured" valuePropName="checked">
@@ -354,7 +548,6 @@ const Categories: React.FC<Props> = ({ cats }) => {
             {editingCategory ? "Güncelle" : "Oluştur"}
           </Button>
         </Form>
-
       </Drawer>
     </>
   );

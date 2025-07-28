@@ -94,7 +94,7 @@ export const UsersService = {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
-        }, // gereksiz çünkü zaten cookie ile gönderiliyor
+        }, 
         cache: "no-store",
       }
     );

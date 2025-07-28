@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\StatusAndFeaturedTrait;
 use App\Models\Category;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -25,6 +27,8 @@ class CategoryController extends Controller
             'title',
             'slug',
             'status',
+            'image',
+            'icon',
             'featured',
             'locale',
             'created_at', // Sıralama için gerekli
@@ -51,7 +55,7 @@ class CategoryController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:300|unique:categories,slug',
             'image' => 'nullable|image|max:2048',
-            'icon' => 'nullable|string|max:255',
+            'icon' => 'nullable|image|max:2048',
             'status' => 'boolean',
             'featured' => 'boolean',
             'locale' => 'nullable|in:tr,en',
@@ -59,14 +63,23 @@ class CategoryController extends Controller
 
         $data = $request->all();
 
-        // Varsayılan olarak 'tr'
         $data['locale'] = $request->input('locale', 'tr');
 
         if (!$request->slug) {
             $data['slug'] = Str::slug($request->title);
             if (Category::where('slug', $data['slug'])->exists()) {
-                $data['slug'] .= '-' . Str::random(5); // Benzersiz hale getirmek için rastgele bir ek ekle
+                $data['slug'] .= '-' . Str::random(5);
             }
+        }
+
+        if ($request->hasFile('image')) {
+            $data['image'] = ImageService::uploadImage($request->file('image'), 'categories');
+            $data['image'] = 'storage/' . $data['image'];
+        }
+
+        if ($request->hasFile('icon')) {
+            $data['icon'] = ImageService::uploadImage($request->file('icon'), 'categories/icons');
+            $data['icon'] = 'storage/' . $data['icon'];
         }
 
         $category = Category::create($data);
@@ -84,7 +97,7 @@ class CategoryController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:300|unique:categories,slug,' . $id,
             'image' => 'nullable|image|max:2048',
-            'icon' => 'nullable|string|max:255',
+            'icon' => 'nullable|image|max:2048',
             'status' => 'nullable|boolean',
             'featured' => 'nullable|boolean',
             'locale' => 'nullable|in:tr,en',
@@ -96,8 +109,27 @@ class CategoryController extends Controller
         }
 
         $data = $request->all();
+
         if (!$request->slug) {
             $data['slug'] = Str::slug($request->title);
+        }
+
+        if ($request->boolean('remove_image')) {
+            ImageService::deleteImage($category->image);
+            $data['image'] = null;
+        } elseif ($request->hasFile('image')) {
+            ImageService::deleteImage($category->image);
+            $data['image'] = ImageService::uploadImage($request->file('image'), 'categories');
+            $data['image'] = 'storage/' . $data['image'];
+        }
+
+        if ($request->boolean('remove_icon')) {
+            ImageService::deleteImage($category->icon);
+            $data['icon'] = null;
+        } elseif ($request->hasFile('icon')) {
+            ImageService::deleteImage($category->icon);
+            $data['icon'] = ImageService::uploadImage($request->file('icon'), 'categories/icons');
+            $data['icon'] = 'storage/' . $data['icon'];
         }
 
         $category->update($data);
@@ -117,6 +149,8 @@ class CategoryController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Kategori bulunamadı!'], 404);
         }
 
+        ImageService::deleteImage($category->icon);
+        ImageService::deleteImage($category->image);
         $category->delete();
 
         return response()->json([
