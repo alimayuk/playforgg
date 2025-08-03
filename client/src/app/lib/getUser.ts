@@ -9,7 +9,7 @@ export async function getUser() {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-            cache: 'no-store',
+            next: { revalidate: 3600 }, // 1 hour
         });
         if (!res.ok) return null;
         const user = await res.json();

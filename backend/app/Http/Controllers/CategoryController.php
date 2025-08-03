@@ -141,7 +141,7 @@ class CategoryController extends Controller
         ], 200);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         $category = Category::find($id);
 

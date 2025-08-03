@@ -9,7 +9,7 @@ class ToggleController extends Controller
     // Beyaz liste: toggle yapılabilecek modeller ve alanlar
     protected $allowedModels = [
         'category' => \App\Models\Category::class,
-        // 'blog' => \App\Models\Blog::class,
+        'blog' => \App\Models\Blog::class,
         // Diğer modelleri ekle...
     ];
 

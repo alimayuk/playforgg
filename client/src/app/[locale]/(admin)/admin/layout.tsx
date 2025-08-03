@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
+  AndroidOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -86,7 +87,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       key: `/${locale}/admin/blogs`,
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href={`/${locale}/admin/blogs`}>Bloglar</a>,
+      label: <p>Bloglar</p>,
+      children: [
+        {
+          key: `/${locale}/admin/blogs/`,
+          label: <a className="text-inherit" href={`/${locale}/admin/blogs`}>Blog Listesi</a>,
+        },
+        {
+          key: `/${locale}/admin/blogs/create`,
+          label: <a className="text-inherit" href={`/${locale}/admin/blogs/create`}>Blog Oluştur</a>,
+        },
+      ],
     },
     {
       key: `/${locale}/admin/categories`,
@@ -94,9 +105,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: <a className="text-inherit" href={`/${locale}/admin/categories`}>Kategoriler</a>,
     },
     {
-      key: `/${locale}/admin/portfolios`,
-      icon: <UploadOutlined />,
-      label: <a className="text-inherit" href={`/${locale}/admin/portfolios`}>Portföyler</a>,
+      key: `/${locale}/admin/games`,
+      icon: <AndroidOutlined />,
+      label: <p>Oyunlar</p>,
+      children: [
+        {
+          key: `/${locale}/admin/games/`,
+          label: <a className="text-inherit" href={`/${locale}/admin/games`}>Oyun Listesi</a>,
+        },
+        {
+          key: `/${locale}/admin/games/create`,
+          label: <a className="text-inherit" href={`/${locale}/admin/games/create`}>Oyun Oluştur</a>,
+        },
+      ],
     },
     ...(user?.roles?.includes("admin")
       ? [(

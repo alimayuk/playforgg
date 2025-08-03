@@ -28,10 +28,10 @@ class Category extends Model
     }
 
     // Örnek: blog, ürün, oyun gibi kategoriye ait içerik ilişkisi
-    // public function blogs()
-    // {
-    //     return $this->hasMany(Blog::class);
-    // }
+    public function blogs()
+    {
+        return $this->hasMany(Blog::class);
+    }
 
     protected static function boot()
     {

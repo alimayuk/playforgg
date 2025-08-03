@@ -22,6 +22,7 @@ export default function LocaleLayout({
   return (
     <html lang={locale}>
       <body
+        suppressHydrationWarning={true}
         style={{
           color: 'white',
           backgroundColor: '#0a0f1c',

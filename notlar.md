@@ -12,6 +12,7 @@ oyunlar
 slidera yazılar gelecek.
 giriş yap - kayıt ol admin için ayrı yapılacak. userlar için olan revize edilecek.
 
+****toggleBlogField fonksiyon haline getirilecek categorilerden değiştirilecek
 
 yorum sistemi tek hale getirilecek.
 
