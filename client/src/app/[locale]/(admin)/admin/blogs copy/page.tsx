@@ -1,4 +1,4 @@
-import Blogs from '@/components/adminPages/Blogs';
+import Blogs from '@/components/pages/admin/Blogs';
 import { cookies } from 'next/headers';
 
 const fetchBlogs = async () => {

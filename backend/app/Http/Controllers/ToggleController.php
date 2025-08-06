@@ -10,6 +10,7 @@ class ToggleController extends Controller
     protected $allowedModels = [
         'category' => \App\Models\Category::class,
         'blog' => \App\Models\Blog::class,
+        'game' => \App\Models\Game::class
         // Diğer modelleri ekle...
     ];
 

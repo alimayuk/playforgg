@@ -1,32 +1,31 @@
 'use client'
-import { Blog, BlogsService } from '@/customServices/blogs.service';
+import { Game, GamesService } from '@/customServices/games.service';
 import { GeneralService } from '@/customServices/general.service';
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Image, message, Popconfirm, Table, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import React, { useState } from 'react'
-
 interface Props {
-    blogsData: {
-        data: Blog[];
+    gamesData: {
+        data: Game[];
         status: boolean;
     };
 }
-const Blogs: React.FC<Props> = ({ blogsData }) => {
-    const [blogs, setBlogs] = React.useState(blogsData?.data);
+const Games: React.FC<Props> = ({ gamesData }) => {
+   const [blogs, setBlogs] = React.useState(gamesData?.data);
     const [loading, setLoading] = React.useState(false);
     const [pagination, setPagination] = useState({ current: 1, pageSize: 5, total: 0 });
 
-    const toggleBlogField = async (blog: Blog, field: "status" | "featured") => {
+    const toggleBlogField = async (game: Game, field: "status" | "featured") => {
         if (loading) return;
 
         try {
             setLoading(true);
-            const updated = await GeneralService.toggleField("blog", blog.id, field);
+            const updated = await GeneralService.toggleField("game", game.id, field);
 
             setBlogs((prev) =>
                 prev.map((b) =>
-                    b.id === blog.id ? { ...b, ...updated.data } : b
+                    b.id === game.id ? { ...b, ...updated.data } : b
                 )
             );
 
@@ -56,23 +55,23 @@ const Blogs: React.FC<Props> = ({ blogsData }) => {
 
         try {
             setLoading(true);
-            const response = await BlogsService.deleteBlog(id);
+            const response = await GamesService.deleteGame(id);
             if (response) {
                 setBlogs((prev) => prev.filter((b) => b.id !== id));
-                message.success("Blog başarıyla silindi.");
+                message.success("Oyun başarıyla silindi.");
             } else {
-                message.error("Blog silinirken bir hata oluştu.");
+                message.error("Oyun silinirken bir hata oluştu.");
             }
         } catch (err: any) {
-            message.error("Blog silinirken bir hata oluştu.");
+            message.error("Oyun silinirken bir hata oluştu.");
         } finally {
             setLoading(false);
         }
     };
-    const editBlog = (blog: Blog) => {
-        window.location.href = `/admin/blogs/${blog.id}/edit`;
+    const editBlog = (game: Game) => {
+        window.location.href = `/admin/games/${game.id}/edit`;
     };
-    const maincolumns: ColumnsType<Blog> = [
+    const maincolumns: ColumnsType<Game> = [
         {
             title: "Başlık",
             dataIndex: "title",
@@ -173,4 +172,4 @@ const Blogs: React.FC<Props> = ({ blogsData }) => {
     )
 }
 
-export default Blogs
+export default Games

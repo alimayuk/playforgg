@@ -1,4 +1,4 @@
-import BlogCreate from '@/components/adminPages/BlogCreate'
+import BlogCreate from '@/components/pages/admin/BlogCreate'
 import React from 'react'
 
 const page = () => {

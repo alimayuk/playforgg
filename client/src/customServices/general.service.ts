@@ -41,7 +41,7 @@ const fetchWithAuth = async <T = any>(
 export const GeneralService = {
 
     toggleField: async (
-        model: "category" | "blog" | "product",
+        model: "category" | "blog" | "product" | "game",
         id: number,
         field: "status" | "featured"
     ): Promise<any> => {

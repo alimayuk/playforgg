@@ -15,22 +15,23 @@ class Category extends Model
         'views' => 'integer',
     ];
 
-    // Ana kategori (eğer bu kategori bir alt kategoriyse)
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
-    // Alt kategoriler
     public function children()
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
 
-    // Örnek: blog, ürün, oyun gibi kategoriye ait içerik ilişkisi
     public function blogs()
     {
         return $this->hasMany(Blog::class);
+    }
+
+    public function games(){
+        return $this->hasMany(Game::class);
     }
 
     protected static function boot()

@@ -16,6 +16,8 @@ giriş yap - kayıt ol admin için ayrı yapılacak. userlar için olan revize e
 
 yorum sistemi tek hale getirilecek.
 
+**empty yapısı kurulacak ve yerleştirilecek.
+
 ***************************YAPILANLAR**********************************
 
 cookie c = admine geçiş için anahtar
