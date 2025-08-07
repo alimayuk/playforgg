@@ -2,34 +2,36 @@
 
 import React, { useEffect, useState } from 'react'
 import {
-    Form, Input, Select, Upload, Switch, Button, message,
+    Form, Input, Select, Switch, Button,
 } from 'antd'
-import { InboxOutlined, UploadOutlined } from '@ant-design/icons'
-import { MDXEditor } from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
-import {
-    headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
-} from '@mdxeditor/editor'
+import { InboxOutlined } from '@ant-design/icons'
 import { getCookie } from 'cookies-next'
 import { CategoriesService, Category } from '@/customServices/categories.service'
 import Dragger from 'antd/es/upload/Dragger'
+import dynamic from 'next/dynamic'
+import 'suneditor/dist/css/suneditor.min.css'
+import plugins from 'suneditor/src/plugins'
+
+const SunEditor = dynamic(() => import('suneditor-react'), { ssr: false })
 
 interface BlogFormProps {
     initialValues?: any
     onSubmit: (values: any, content: string) => Promise<void>
     loading?: boolean
 }
+
 const normFile = (e: any) => {
     if (Array.isArray(e)) {
         return e;
     }
     return e?.fileList;
 };
+
 const BlogForm: React.FC<BlogFormProps> = ({ initialValues, onSubmit, loading = false }) => {
     const [form] = Form.useForm()
     const [content, setContent] = useState(initialValues?.content || '')
     const [allLocaleCategories, setAllLocaleCategories] = useState<Category[]>([])
-    const [imageRemoved, setImageRemoved] = useState(false);
+    const [imageRemoved, setImageRemoved] = useState(false)
 
     const currentLocale = initialValues?.locale || getCookie("NEXT_LOCALE")?.toString() || "tr"
 
@@ -48,10 +50,8 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialValues, onSubmit, loading = 
     }
 
     const handleFinish = async (values: any) => {
-        await onSubmit({ ...values, imageRemoved }, content);
-    };
-
-
+        await onSubmit({ ...values, imageRemoved }, content)
+    }
     return (
         <Form
             form={form}
@@ -87,8 +87,8 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialValues, onSubmit, loading = 
                     accept="image/*"
                     maxCount={1}
                     onRemove={() => {
-                        setImageRemoved(true);
-                        return true;
+                        setImageRemoved(true)
+                        return true
                     }}
                 >
                     <p className="ant-upload-drag-icon">
@@ -101,51 +101,58 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialValues, onSubmit, loading = 
             </Form.Item>
 
             <Form.Item label="İçerik">
-                <div className="border border-gray-300 rounded">
-                    <MDXEditor
-                        markdown={content}
-                        onChange={(val) => setContent(val)}
-                        plugins={[
-                            headingsPlugin(),
-                            quotePlugin(),
-                            listsPlugin(),
-                            codeBlockPlugin({ defaultCodeBlockLanguage: 'js' }),
-                            linkPlugin(),
-                            imagePlugin({
-                                imageUploadHandler: async (file) => {
-                                    const formData = new FormData()
-                                    formData.append('file', file)
-                                    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/upload-temp`, {
-                                        method: 'POST',
-                                        body: formData,
-                                        credentials: 'include',
+                <div className="border border-gray-300 rounded overflow-hidden prose max-w-none">
+                    <SunEditor
+                        setContents={content}
+                        defaultValue={content}      // initial content burada verilir
+                        onChange={setContent}        // değişiklikleri yakala
+                        height="400px"
+                        setOptions={{
+                            buttonList: [
+                                ['undo', 'redo', 'formatBlock'],
+                                ['bold', 'italic', 'underline'],
+                                ['list', 'align', 'fontSize'],
+                                ['link', 'image', 'video'],
+                                ['fontColor', 'hiliteColor', 'textStyle'],
+                                ['table', 'codeView', 'removeFormat'],
+                            ],
+                            plugins: plugins,
+                        }}
+
+                        onImageUploadBefore={(files, info, uploadHandler) => {
+
+                            const file = files[0]
+                            const formData = new FormData()
+                            formData.append('file', file)
+
+                            fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/upload-temp`, {
+                                method: 'POST',
+                                body: formData,
+                                credentials: 'include',
+                            })
+                                .then((res) => res.json())
+                                .then((data) => {
+                                    console.log('Upload success:', data)
+                                    uploadHandler({
+                                        result: [
+                                            {
+                                                url: data.url,
+                                                name: file.name,
+                                                size: file.size,
+                                            },
+                                        ],
                                     })
-                                    const data = await res.json()
-                                    return data.url
-                                },
-                            }),
-                            tablePlugin(),
-                            markdownShortcutPlugin(),
-                            frontmatterPlugin(),
-                            toolbarPlugin({
-                                toolbarContents: () => (
-                                    <>
-                                        <BoldItalicUnderlineToggles />
-                                        <Separator />
-                                        <BlockTypeSelect />
-                                        <Separator />
-                                        <ListsToggle />
-                                        <Separator />
-                                        <CodeToggle />
-                                        <Separator />
-                                        <CreateLink />
-                                        <InsertImage />
-                                        <InsertTable />
-                                    </>
-                                ),
-                            }),
-                        ]}
+                                })
+                                .catch((err) => {
+                                    console.error('Upload failed', err)
+                                })
+
+                            return false
+                        }}
+
                     />
+
+
                 </div>
             </Form.Item>
 

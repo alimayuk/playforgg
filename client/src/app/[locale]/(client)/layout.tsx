@@ -2,7 +2,7 @@ import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import '../../globals.css';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function LocaleLayout({
@@ -36,7 +36,7 @@ export default function LocaleLayout({
           backgroundAttachment: 'fixed',
         }}
       >
-        <LanguageSwitcher />
+        <Navbar />
         {children}
         <Footer />
       </body>

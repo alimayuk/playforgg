@@ -47,11 +47,12 @@ export default function Navbar() {
     // { title: "Bloglar", link: "/blog" },
     {
       title: "Bloglar",
-      children: [
-        { title: "Tüm Bloglar", link: "/blogs" },
-        { title: "Kılavuzlar", link: "/blogs/guides" },
-        { title: "Oyun İpuçları", link: "/blogs/tips" },
-      ],
+      link: "/blogs",
+      // children: [
+      //   { title: "Tüm Bloglar", link: "/blogs" },
+      //   { title: "Kılavuzlar", link: "/blogs/guides" },
+      //   { title: "Oyun İpuçları", link: "/blogs/tips" },
+      // ],
     },
     {
       title: "Forumlar", link: "/forums",

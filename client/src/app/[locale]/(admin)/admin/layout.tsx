@@ -119,6 +119,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         },
       ],
     },
+    {
+      key: `/${locale}/admin/news`,
+      icon: <AndroidOutlined />,
+      label: <p>Haberler</p>,
+      children: [
+        {
+          key: `/${locale}/admin/news/`,
+          label: <a className="text-inherit" href={`/${locale}/admin/news`}>Haber Listesi</a>,
+        },
+        {
+          key: `/${locale}/admin/news/create`,
+          label: <a className="text-inherit" href={`/${locale}/admin/news/create`}>Haber Oluştur</a>,
+        },
+      ],
+    },
     ...(user?.roles?.includes("admin")
       ? [(
         {

@@ -5,11 +5,11 @@ import {
     Form, Input, Select, Upload, Switch, Button, message,
 } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
-import { MDXEditor } from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
 import {
+    MDXEditor,linkDialogPlugin,
     headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
 } from '@mdxeditor/editor'
+import '@mdxeditor/editor/style.css'
 import { getCookie } from 'cookies-next'
 import { CategoriesService, Category } from '@/customServices/categories.service'
 import { BlogsService } from '@/customServices/blogs.service'
@@ -129,6 +129,7 @@ const BlogCreate = () => {
                                                 setContent(val);
                                             }}
                                             plugins={[
+                                                linkDialogPlugin(),
                                                 headingsPlugin(),
                                                 quotePlugin(),
                                                 listsPlugin(),

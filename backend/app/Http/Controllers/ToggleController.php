@@ -6,25 +6,23 @@ use Illuminate\Http\Request;
 
 class ToggleController extends Controller
 {
-    // Beyaz liste: toggle yapılabilecek modeller ve alanlar
     protected $allowedModels = [
         'category' => \App\Models\Category::class,
         'blog' => \App\Models\Blog::class,
-        'game' => \App\Models\Game::class
-        // Diğer modelleri ekle...
+        'game' => \App\Models\Game::class,
+        'article' => \App\Models\Article::class
     ];
 
     protected $allowedFields = [
         'status',
         'featured',
-        // İstersen başka boolean alanlar ekle
+        // istersen başka boolean alanlar ekle
     ];
 
     public function toggleField(Request $request, $model, $id)
     {
         $model = strtolower($model);
 
-        // Model beyaz liste kontrolü
         if (!array_key_exists($model, $this->allowedModels)) {
             return response()->json([
                 'status' => 'error',
@@ -32,7 +30,6 @@ class ToggleController extends Controller
             ], 400);
         }
 
-        // Hangi alan toggle yapılacak? query parametre veya body'den alabilirsin
         $field = $request->query('field') ?? $request->input('field');
         if (!$field || !in_array($field, $this->allowedFields)) {
             return response()->json([
@@ -51,7 +48,6 @@ class ToggleController extends Controller
             ], 404);
         }
 
-        // Alanın toggle edilmesi (boolean varsayımı)
         $currentValue = $item->$field;
         $item->$field = !$currentValue;
         $item->save();
