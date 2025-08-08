@@ -12,10 +12,10 @@ const fetchWithAuth = async <T = any>(
     url: string,
     options: RequestInit = {}
 ): Promise<T> => {
-    
+
     const headers = new Headers(options.headers);
 
-    
+
     if (options.body && !(options.body instanceof FormData)) {
         headers.set("Content-Type", "application/json");
     }
@@ -52,7 +52,7 @@ export const ArticlesService = {
         page: number = 1,
         per_page: number = 5
     ): Promise<{ data: Article[]; status: boolean; meta?: any }> => {
-        
+
         const queryLocale = locale && locale !== "hepsi" ? locale : "hepsi";
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/articles?locale=${queryLocale}&page=${page}&per_page=${per_page}`;
 
@@ -81,7 +81,7 @@ export const ArticlesService = {
     },
 
     createArticle: async (values: Record<string, any>): Promise<{ data: Article }> => {
-        
+
         const isFormData = values instanceof FormData;
 
         return fetchWithAuth<{ data: Article }>(
@@ -99,14 +99,10 @@ export const ArticlesService = {
     ): Promise<{ data: Article }> => {
         const isFormData = values instanceof FormData;
 
-        if (isFormData) {
-            values.append("_method", "PUT"); 
-        }
-
         return fetchWithAuth<{ data: Article }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}`,
             {
-                method: isFormData ? "POST" : "PUT",
+                method: "POST",
                 body: isFormData ? values : JSON.stringify(values),
             }
         );

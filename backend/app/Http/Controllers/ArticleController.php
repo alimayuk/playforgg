@@ -13,7 +13,7 @@ class ArticleController extends Controller
 {
     public function index(Request $request)
     {
-        $articles = Article::where('status', 1)->get();
+        $articles = Article::get();
         return response()->json([
             'status' => 'success',
             'data' => $articles,
@@ -25,7 +25,7 @@ class ArticleController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:300|unique:categories,slug',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image',
             'status' => 'boolean',
             'excerpt' => 'nullable|string',
             'locale' => 'nullable|in:tr,en',
@@ -46,7 +46,7 @@ class ArticleController extends Controller
             $data['image'] = ImageService::uploadImage($request->file('image'), 'articles');
             $data['image'] = 'storage/' . $data['image'];
         }
-        $data['author_id'] = $request->user()->id;
+        $data['author_id'] = auth()->id();
         $article = Article::create($data);
 
         return response()->json([
@@ -54,6 +54,45 @@ class ArticleController extends Controller
             "data" => $article,
             "status" => true
         ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'image' => 'nullable|image',
+            'status' => 'nullable|boolean',
+            'excerpt' => 'nullable|string',
+            'locale' => 'nullable|in:tr,en',
+        ]);
+
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json(['status' => 'error', 'message' => 'Haber bulunamadı!'], 404);
+        }
+
+        $data = $request->all();
+
+        if (!$request->slug) {
+            $data['slug'] = Str::slug($request->title);
+        }
+
+        if ($request->boolean('remove_image')) {
+            ImageService::deleteImage($article->image);
+            $data['image'] = null;
+        } elseif ($request->hasFile('image')) {
+            ImageService::deleteImage($article->image);
+            $data['image'] = ImageService::uploadImage($request->file('image'), 'articles');
+            $data['image'] = 'storage/' . $data['image'];
+        }
+        $data['author_id'] = auth()->id();
+        $article->update($data);
+
+        return response()->json([
+            'message' => 'Kayıt başarıyla güncellendi.',
+            'data' => $article,
+            'status' => true
+        ], 200);
     }
 
     public function destroy($id)

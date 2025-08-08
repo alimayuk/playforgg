@@ -67,13 +67,16 @@ const Articles: React.FC<Props> = ({ initialData }) => {
   const onUploadChange = ({ fileList: newFileList }: { fileList: any[] }) => {
     setFileList(newFileList);
     form.setFieldsValue({ image: newFileList });
+    if (newFileList.length > 0) {
+      setImageRemoved(false);
+    }
   };
 
   useEffect(() => {
-    fetchFilteredCategories();
+    fetchFilteredArticles();
   }, [localeFilter, pagination.current, pagination.pageSize]);
 
-  const fetchFilteredCategories = async () => {
+  const fetchFilteredArticles = async () => {
     try {
       setLoading(true);
       const res = await ArticlesService.getArticles(
@@ -121,6 +124,14 @@ const Articles: React.FC<Props> = ({ initialData }) => {
         "Image file object:",
         values.image && values.image[0] ? values.image[0].originFileObj : null
       );
+      let fileObj = null;
+
+      if (values.image && values.image[0]) {
+        // Öncelik originFileObj
+        fileObj = values.image[0].originFileObj || values.image[0];
+      }
+
+      console.log("Image file object last:", fileObj instanceof File ? fileObj : null);
 
       const formData = new FormData();
 
@@ -139,7 +150,6 @@ const Articles: React.FC<Props> = ({ initialData }) => {
 
       if (editingArticle) {
         formData.append("remove_image", imageRemoved ? "1" : "0");
-
         const updatedArticle = await ArticlesService.updateArticle(
           formData,
           editingArticle.id
@@ -151,11 +161,11 @@ const Articles: React.FC<Props> = ({ initialData }) => {
               : article
           )
         );
-        await fetchFilteredCategories();
+        await fetchFilteredArticles();
         message.success("Haber güncellendi.");
       } else {
         await ArticlesService.createArticle(formData);
-        await fetchFilteredCategories();
+        await fetchFilteredArticles();
         message.success("Haber oluşturuldu.");
       }
 
@@ -171,7 +181,7 @@ const Articles: React.FC<Props> = ({ initialData }) => {
     try {
       await ArticlesService.deleteArticle(id);
       setArticles((prev) => prev.filter((item) => item.id !== id));
-      await fetchFilteredCategories();
+      await fetchFilteredArticles();
       message.success("Haber silindi.");
     } catch (error: any) {
       message.error(error?.message || "Silme sırasında hata oluştu.");
@@ -184,13 +194,13 @@ const Articles: React.FC<Props> = ({ initialData }) => {
     const convertToFileList = (filePath: string | null, name: string) =>
       filePath
         ? [
-            {
-              uid: "-1",
-              name: filePath.split("/").pop() || name,
-              status: "done",
-              url: `${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${filePath}`,
-            },
-          ]
+          {
+            uid: "-1",
+            name: filePath.split("/").pop() || name,
+            status: "done",
+            url: `${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${filePath}`,
+          },
+        ]
         : [];
 
     form.setFieldsValue({
@@ -198,7 +208,7 @@ const Articles: React.FC<Props> = ({ initialData }) => {
       image: convertToFileList(article.image, "image"),
     });
     setFileList(
-      convertToFileList(article.image, "image") // Düzenlerken mevcut görseli göster
+      convertToFileList(article.image, "image")
     );
     setDrawerOpen(true);
   };
@@ -414,29 +424,67 @@ const Articles: React.FC<Props> = ({ initialData }) => {
             name="image"
             valuePropName="fileList"
             getValueFromEvent={normFile}
-            extra="Maksimum 1 dosya yükleyebilirsiniz."
+            extra="Dosya yükleyebilirsiniz."
           >
-            <ImgCrop aspect={4 / 5} cropShape="rect" quality={1}>
+            <ImgCrop rotationSlider aspect={4 / 5} cropShape="rect" quality={1}>
               <Upload
-                name="image"
                 listType="picture-card"
                 fileList={fileList}
                 onChange={onUploadChange}
-                beforeUpload={() => false}
-                maxCount={1}
-                accept="image/*"
+                beforeUpload={(file) =>
+                  new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const img = new window.Image();
+                      img.src = reader.result as string;
+                      img.onload = () => {
+                        const maxWidth = 1080;
+                        const maxHeight = 1035;
+
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth || height > maxHeight) {
+                          const widthRatio = maxWidth / width;
+                          const heightRatio = maxHeight / height;
+                          const ratio = Math.min(widthRatio, heightRatio);
+                          width = width * ratio;
+                          height = height * ratio;
+
+                          const canvas = document.createElement("canvas");
+                          canvas.width = width;
+                          canvas.height = height;
+                          const ctx = canvas.getContext("2d");
+                          ctx?.drawImage(img, 0, 0, width, height);
+
+                          canvas.toBlob((blob) => {
+                            if (blob) {
+                              const croppedFile = new File([blob], file.name, { type: file.type });
+                              resolve(croppedFile);
+                            } else {
+                              resolve(file);
+                            }
+                          }, file.type);
+                        } else {
+                          resolve(file);
+                        }
+                      };
+                    };
+                    reader.readAsDataURL(file);
+                  })
+                }
                 onRemove={() => {
                   setImageRemoved(true);
                   setFileList([]);
                   return true;
                 }}
               >
-                {fileList.length < 1 && (
-                  <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
-                )}
+                {fileList.length < 1 && "+ Upload"}
               </Upload>
             </ImgCrop>
           </Form.Item>
+
+
 
           <Form.Item name="status" valuePropName="checked" initialValue={true}>
             <Checkbox>Aktif</Checkbox>
