@@ -1,20 +1,21 @@
 'use client';
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getCookie } from 'cookies-next';
+import { useUserStore } from '@/stores/userStore';
 
 type ReplyType = {
     id: number;
-    name: string;
+    user: { id: number; username: string };
     text: string;
-    createdAt: string; // ISO string bekleniyor, Date objesine çevirme
+    created_at: string;
 };
 
 type CommentType = {
     id: number;
-    name: string;
+    user: { id: number; username: string };
     text: string;
-    createdAt: string;
+    created_at: string;
     replies: ReplyType[];
 };
 
@@ -66,44 +67,180 @@ export default function BlogDetailPage({ initialData }: Props) {
     const [commentText, setCommentText] = useState('');
     const [replyText, setReplyText] = useState('');
     const [activeReply, setActiveReply] = useState<number | null>(null);
-    const isLoggedIn = true; // Simule edilen kullanıcı durumu
-
-    const handleAddComment = () => {
-        if (commentText.trim()) {
-            const newComment: CommentType = {
-                id: Date.now(),
-                name: 'Ziyaretçi',
-                text: commentText,
-                createdAt: new Date().toISOString(),
-                replies: [],
-            };
-            setComments([newComment, ...comments]);
-            setCommentText('');
+    const [loading, setLoading] = useState(false);
+    const user = useUserStore((s) => s.user);
+    const [editingComment, setEditingComment] = useState<number | null>(null);
+    const [editText, setEditText] = useState("");
+    const [editingReply, setEditingReply] = useState<number | null>(null);
+    const [editReplyText, setEditReplyText] = useState("");
+    // Yorumları yükle
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_SERVER_URL}/client/blogs/${blog.id}/comments`
+                );
+                if (!res.ok) throw new Error('Yorumlar yüklenemedi');
+                const data = await res.json();
+                setComments(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchComments();
+    }, [blog.id]);
+    const handleDeleteComment = async (commentId: number) => {
+        if (!confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${commentId}`,
+                {
+                    method: "DELETE",
+                    credentials: "include"
+                }
+            );
+            if (!res.ok) throw new Error("Silme başarısız");
+            setComments(prev => prev.filter(c => c.id !== commentId));
+        } catch (err) {
+            console.error(err);
         }
     };
 
-    const handleAddReply = (commentId: number) => {
-        if (replyText.trim()) {
-            const newReply: ReplyType = {
-                id: Date.now(),
-                name: 'Ziyaretçi',
-                text: replyText,
-                createdAt: new Date().toISOString(),
-            };
+    const handleUpdateComment = async (commentId: number) => {
+        if (!editText.trim()) return;
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${commentId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ text: editText })
+                }
+            );
+            if (!res.ok) throw new Error("Güncelleme başarısız");
+            const updated = await res.json();
+            setComments(prev =>
+                prev.map(c => (c.id === commentId ? { ...c, text: updated.text } : c))
+            );
+            setEditingComment(null);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleAddComment = async () => {
+        if (!commentText.trim()) return;
+        setLoading(true);
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ text: commentText })
+                }
+            );
+            if (!res.ok) throw new Error('Yorum eklenemedi');
+            const newComment = await res.json();
+            setComments((prev) => [newComment, ...prev]);
+            setCommentText('');
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddReply = async (commentId: number) => {
+        if (!replyText.trim()) return;
+        setLoading(true);
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ text: replyText, parent_id: commentId })
+                }
+            );
+            if (!res.ok) throw new Error('Yanıt eklenemedi');
+            const newReply = await res.json();
             setComments((prev) =>
                 prev.map((c) =>
-                    c.id === commentId ? { ...c, replies: [...c.replies, newReply] } : c
+                    c.id === commentId
+                        ? { ...c, replies: [...c.replies, newReply] }
+                        : c
                 )
             );
             setReplyText('');
             setActiveReply(null);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
-
+    const handleEditReply = (reply: any) => {
+        setActiveReply(reply.id);
+        setReplyText(reply.text);
+    };
+    const handleDeleteReply = async (replyId: number) => {
+        if (!confirm("Bu yanıtı silmek istediğinizden emin misiniz?")) return;
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${replyId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error("Silme başarısız");
+            setComments(prev =>
+                prev.map(c => ({
+                    ...c,
+                    replies: c.replies.filter(r => r.id !== replyId)
+                }))
+            );
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    const handleUpdateReply = async (replyId: number) => {
+        if (!editReplyText.trim()) return;
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${replyId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ text: editReplyText })
+                }
+            );
+            if (!res.ok) throw new Error("Yanıt güncellenemedi");
+            const updated = await res.json();
+            setComments(prev =>
+                prev.map(c => ({
+                    ...c,
+                    replies: c.replies.map(r =>
+                        r.id === replyId ? { ...r, text: updated.text } : r
+                    )
+                }))
+            );
+            setEditingReply(null);
+        } catch (err) {
+            console.error(err);
+        }
+    };
     return (
         <div className="max-w-screen-2xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-8 text-gray-200">
+                {/* Blog Content */}
                 <div>
                     <img
                         src={
@@ -112,25 +249,23 @@ export default function BlogDetailPage({ initialData }: Props) {
                                 : 'https://via.placeholder.com/800x450?text=No+Image'
                         }
                         alt={blog.title}
-                        className="w-full h-72 object-cover rounded-xl mb-6"
+                        className="w-full h-72 object-cover object-top rounded-xl mb-6"
                     />
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
                         <span>{blog.category.title}</span>
                         <span>{blog.date}</span>
                     </div>
                     <h1 className="text-3xl font-bold mb-4 text-white">{blog.title}</h1>
-
                     <div className='prose max-w-none text-white '>
                         <div dangerouslySetInnerHTML={{ __html: blog.content }} />
                     </div>
-
                 </div>
 
                 {/* Comments */}
                 <div>
                     <h2 className="text-2xl font-bold mb-4 text-orange-500">Yorumlar</h2>
 
-                    {isLoggedIn ? (
+                    {user ? (
                         <div className="mb-6">
                             <textarea
                                 placeholder="Yorumunuzu yazın (max 400 karakter)..."
@@ -144,84 +279,185 @@ export default function BlogDetailPage({ initialData }: Props) {
                                 <span className="text-sm">{400 - commentText.length} karakter kaldı</span>
                                 <button
                                     onClick={handleAddComment}
-                                    className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition"
+                                    disabled={loading}
+                                    className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition disabled:opacity-50"
                                 >
                                     Gönder
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-sm italic text-gray-400">
+                        <p className="text-sm italic text-gray-400 mb-5">
                             Yorum yapabilmek için giriş yapmalısınız.
                         </p>
                     )}
 
+                    {/* Comment list */}
                     <div className="space-y-6">
-                        {/* Yorum listesi */}
                         {comments.map((comment) => (
                             <div key={comment.id} className="bg-[#1e293b] rounded-lg p-4">
-                                <div>
-                                    <p className="font-semibold text-sm text-orange-400">{comment.name}</p>
-                                    <p className="text-gray-300 text-sm whitespace-pre-line break-words">{comment.text}</p>
-                                    <div className="text-xs text-gray-500 mt-1">{timeAgo(comment.createdAt)}</div>
+                                <div className="flex justify-between">
+                                    <p className="font-semibold text-sm text-orange-400">{comment.user.username}</p>
 
-                                    {/* Yanıtla butonu */}
-                                    {isLoggedIn && (
-                                        <button
-                                            className="text-sm text-orange-500 mt-2 hover:underline"
-                                            onClick={() => setActiveReply(comment.id)}
-                                        >
-                                            Yanıtla
-                                        </button>
-                                    )}
-
-                                    {/* Yanıtlar */}
-                                    {comment.replies.length > 0 && (
-                                        <div className="mt-4 space-y-3 pl-4 border-l-2 border-orange-700">
-                                            {comment.replies.map((reply) => (
-                                                <div key={reply.id}>
-                                                    <p className="font-semibold text-sm text-orange-500">{reply.name}</p>
-                                                    <p className="text-gray-300 text-sm whitespace-pre-line break-words">{reply.text}</p>
-                                                    <div className="text-xs text-gray-500 mt-1">{timeAgo(reply.createdAt)}</div>
-                                                </div>
-                                            ))}
+                                    {/* Eğer giriş yapmış kullanıcı kendi yorumunu görüyorsa */}
+                                    {user && user.id === comment.user.id && (
+                                        <div className="flex gap-2 text-xs text-gray-400">
+                                            <button
+                                                onClick={() => {
+                                                    setActiveReply(null);
+                                                    setReplyText("");
+                                                    setEditingComment(comment.id);
+                                                    setEditText(comment.text);
+                                                }}
+                                                className="hover:text-orange-500"
+                                            >
+                                                Düzenle
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteComment(comment.id)}
+                                                className="hover:text-red-500"
+                                            >
+                                                Sil
+                                            </button>
                                         </div>
                                     )}
+                                </div>
 
-                                    {/* Yanıt kutusu */}
-                                    {activeReply === comment.id && (
-                                        <div className="mt-2">
-                                            <textarea
-                                                placeholder="Yanıtınızı yazın (max 400 karakter)..."
-                                                className="w-full border border-gray-600 bg-[#1e293b] rounded-lg p-2 text-sm text-gray-200 resize-none max-h-36"
-                                                rows={2}
-                                                maxLength={400}
-                                                value={replyText}
-                                                onChange={(e) => setReplyText(e.target.value)}
-                                            />
-                                            <div className="flex justify-between items-center mt-1 text-gray-400">
-                                                <span className="text-xs">{400 - replyText.length} karakter kaldı</span>
-                                                <div className="flex gap-2">
+                                {/* Düzenleme modu */}
+                                {editingComment === comment.id ? (
+                                    <div className="mt-2">
+                                        <textarea
+                                            className="w-full border border-gray-600 bg-[#1e293b] rounded-lg p-2 text-sm text-gray-200 resize-none"
+                                            rows={2}
+                                            maxLength={400}
+                                            value={editText}
+                                            onChange={(e) => setEditText(e.target.value)}
+                                        />
+                                        <div className="flex justify-end gap-2 mt-1">
+                                            <button
+                                                onClick={() => handleUpdateComment(comment.id)}
+                                                className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
+                                            >
+                                                Kaydet
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingComment(null)}
+                                                className="px-3 py-1 text-sm text-gray-400 hover:underline"
+                                            >
+                                                Vazgeç
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className="text-gray-300 text-sm whitespace-pre-line break-words">{comment.text}</p>
+                                        <div className="text-xs text-gray-500 mt-1">{timeAgo(comment.created_at)}</div>
+                                    </>
+                                )}
+
+                                {user && (
+                                    <button
+                                        className="text-sm text-orange-500 mt-2 hover:underline"
+                                        onClick={() => setActiveReply(comment.id)}
+                                    >
+                                        Yanıtla
+                                    </button>
+                                )}
+
+                                {/* Replies */}
+                                {comment.replies.map((reply) => (
+                                    <div key={reply.id} className="border-l-2 border-orange-700 pl-4">
+                                        <p className="font-semibold text-sm text-orange-500">{reply.user.username}</p>
+
+                                        {editingReply === reply.id ? (
+                                            <>
+                                                <textarea
+                                                    className="w-full border border-gray-600 bg-[#1e293b] rounded-lg p-2 text-sm text-gray-200 resize-none"
+                                                    rows={2}
+                                                    maxLength={400}
+                                                    value={editReplyText}
+                                                    onChange={(e) => setEditReplyText(e.target.value)}
+                                                />
+                                                <div className="flex gap-2 mt-1">
                                                     <button
-                                                        onClick={() => handleAddReply(comment.id)}
-                                                        className="text-sm px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition"
+                                                        onClick={() => handleUpdateReply(reply.id)}
+                                                        className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
                                                     >
-                                                        Gönder
+                                                        Kaydet
                                                     </button>
                                                     <button
-                                                        onClick={() => {
-                                                            setActiveReply(null);
-                                                            setReplyText('');
-                                                        }}
-                                                        className="text-sm text-gray-400 hover:underline"
+                                                        onClick={() => setEditingReply(null)}
+                                                        className="px-3 py-1 text-sm text-gray-400 hover:underline"
                                                     >
                                                         Vazgeç
                                                     </button>
                                                 </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="text-gray-300 text-sm whitespace-pre-line break-words">{reply.text}</p>
+                                                <div className="text-xs text-gray-500 mt-1">{timeAgo(reply.created_at)}</div>
+                                            </>
+                                        )}
+
+                                        {reply.user.id === user?.id && editingReply !== reply.id && (
+                                            <div className="flex gap-3 mt-1">
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingReply(reply.id);
+                                                        setEditReplyText(reply.text);
+                                                    }}
+                                                    className="text-xs text-blue-400 hover:underline"
+                                                >
+                                                    Düzenle
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteReply(reply.id)}
+                                                    className="text-xs text-red-400 hover:underline"
+                                                >
+                                                    Sil
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+
+
+                                {/* Reply box */}
+                                {activeReply === comment.id && (
+                                    <div className="mt-2">
+                                        <textarea
+                                            placeholder="Yanıtınızı yazın (max 400 karakter)..."
+                                            className="w-full border border-gray-600 bg-[#1e293b] rounded-lg p-2 text-sm text-gray-200 resize-none max-h-36"
+                                            rows={2}
+                                            maxLength={400}
+                                            value={replyText}
+                                            onChange={(e) => setReplyText(e.target.value)}
+                                        />
+                                        <div className="flex justify-between items-center mt-1 text-gray-400">
+                                            <span className="text-xs">{400 - replyText.length} karakter kaldı</span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleAddReply(comment.id)}
+                                                    disabled={loading}
+                                                    className="text-sm px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition disabled:opacity-50"
+                                                >
+                                                    Gönder
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setActiveReply(null);
+                                                        setReplyText('');
+                                                    }}
+                                                    className="text-sm text-gray-400 hover:underline"
+                                                >
+                                                    Vazgeç
+                                                </button>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

@@ -85,5 +85,22 @@ export const ClientService = {
         );
 
         return data;
+    },
+
+    getArticles: async (
+        locale: string = 'tr',
+        page: number = 1,
+        per_page: number = 5
+    ): Promise<{ data: Blog[]; status: boolean; meta?: any }> => {
+        const queryLocale = locale && locale !== "hepsi" ? locale : "hepsi";
+        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/client/articles?locale=${queryLocale}&page=${page}&per_page=${per_page}`;
+        const data = await fetchWithoutAuth<{ data: Blog[]; status: boolean; meta?: any }>(
+            url,
+            {
+                method: "GET",
+            }
+        );
+
+        return data;
     }
 };

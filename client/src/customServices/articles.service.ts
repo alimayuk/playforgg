@@ -42,6 +42,7 @@ export interface Article {
     title: string;
     slug: string;
     locale: string;
+    excerpt: string;
     [key: string]: any;
 }
 

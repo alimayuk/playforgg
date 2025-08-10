@@ -6,13 +6,15 @@ import {
 } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 import {
-    MDXEditor,linkDialogPlugin,
+    MDXEditor, linkDialogPlugin,
     headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
 } from '@mdxeditor/editor'
 import '@mdxeditor/editor/style.css'
 import { getCookie } from 'cookies-next'
 import { CategoriesService, Category } from '@/customServices/categories.service'
 import { BlogsService } from '@/customServices/blogs.service'
+import SunEditor from 'suneditor-react'
+import plugins from 'suneditor/src/plugins';
 
 const BlogCreate = () => {
     const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
@@ -114,68 +116,62 @@ const BlogCreate = () => {
                         <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
                     </Upload>
                 </Form.Item>
-                <Form.Item shouldUpdate>
-                    {({ setFields, getFieldValue }) => {
-                        const contentValue = getFieldValue('content');
-                        return (
-                            <Form.Item name="content" label="İçerik" rules={[{ required: true, message: 'İçerik alanı zorunludur.' }]}>
-                                <div className="border border-gray-300 rounded">
-                                    <div className="prose max-w-none">
-                                        <MDXEditor
-                                            markdown={content}
-                                            key={editorKey}
-                                            onChange={(val) => {
-                                                form.setFieldsValue({ content: val });
-                                                setContent(val);
-                                            }}
-                                            plugins={[
-                                                linkDialogPlugin(),
-                                                headingsPlugin(),
-                                                quotePlugin(),
-                                                listsPlugin(),
-                                                codeBlockPlugin({ defaultCodeBlockLanguage: 'js' }),
-                                                linkPlugin(),
-                                                imagePlugin({
-                                                    imageUploadHandler: async (file) => {
-                                                        const formData = new FormData()
-                                                        formData.append('file', file)
-                                                        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/upload-temp`, {
-                                                            method: 'POST',
-                                                            body: formData,
-                                                            credentials: 'include',
-                                                        })
-                                                        const data = await res.json()
-                                                        return data.url
-                                                    },
-                                                }),
-                                                tablePlugin(),
-                                                markdownShortcutPlugin(),
-                                                frontmatterPlugin(),
-                                                toolbarPlugin({
-                                                    toolbarContents: () => (
-                                                        <>
-                                                            <BoldItalicUnderlineToggles />
-                                                            <Separator />
-                                                            <BlockTypeSelect />
-                                                            <Separator />
-                                                            <ListsToggle />
-                                                            <Separator />
-                                                            <CodeToggle />
-                                                            <Separator />
-                                                            <CreateLink />
-                                                            <InsertImage />
-                                                            <InsertTable />
-                                                        </>
-                                                    ),
-                                                }),
-                                            ]}
-                                        /></div>
-                                </div>
-                            </Form.Item>
-                        );
-                    }
-                    }
+                <Form.Item label="İçerik">
+                    <div className="border border-gray-300 rounded overflow-hidden prose max-w-none">
+                        <SunEditor
+                            setContents={content}
+                            defaultValue={content}      // initial content burada verilir
+                            onChange={setContent}        // değişiklikleri yakala
+                            height="400px"
+                            setOptions={{
+                                buttonList: [
+                                    ['undo', 'redo', 'formatBlock'],
+                                    ['bold', 'italic', 'underline'],
+                                    ['list', 'align', 'fontSize'],
+                                    ['link', 'image', 'video'],
+                                    ['fontColor', 'hiliteColor', 'textStyle'],
+                                    ['table', 'codeView', 'removeFormat'],
+                                ],
+                                plugins: plugins,
+                            }}
+
+                            onImageUploadBefore={(files, info, uploadHandler) => {
+
+                                const file = files[0]
+                                const formData = new FormData()
+                                formData.append('file', file)
+
+                                fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/upload-temp`, {
+                                    method: 'POST',
+                                    body: formData,
+                                    credentials: 'include',
+                                })
+                                    .then((res) => res.json())
+                                    .then((data) => {
+                                        console.log('Upload success:', data)
+                                        uploadHandler({
+                                            result: [
+                                                {
+                                                    url: data.url,
+                                                    name: file.name,
+                                                    size: file.size,
+                                                },
+                                            ],
+                                        })
+                                    })
+                                    .catch((err) => {
+                                        console.error('Upload failed', err)
+                                    })
+
+                                return false
+                            }}
+
+                        />
+
+
+                    </div>
                 </Form.Item>
+
                 <Form.Item name="excerpt" label="Özet" rules={[{ max: 500, message: 'Özet 400 karakterden fazla olamaz.' }]}>
                     <Input.TextArea rows={3} placeholder="İçeriğin kısa özeti" />
                 </Form.Item>

@@ -14,7 +14,7 @@ import { deleteCookie, getCookie } from "cookies-next";
 import { useUserStore } from "@/stores/userStore";
 import '../../../globals.css';
 import LoadingScreen from "@/components/LoadingScreen";
-
+import 'suneditor/dist/css/suneditor.min.css'
 const { Header, Content } = Layout;
 type MenuItem = {
   key: string;

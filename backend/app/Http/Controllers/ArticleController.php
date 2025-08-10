@@ -6,18 +6,44 @@ use App\Models\Article;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
     public function index(Request $request)
     {
-        $articles = Article::get();
+        $locale = $request->get('locale', 'tr');
+        $perPage = (int) $request->get('per_page', 5);
+
+        $query = Article::query();
+
+        if ($locale !== 'hepsi') {
+            $query->where('locale', $locale);
+        }
+
+        $query->select([
+            'id',
+            'title',
+            'excerpt',
+            'slug',
+            'status',
+            'image',
+            'locale',
+            'created_at',
+        ])->orderBy('created_at', 'desc');
+
+        $articles = $query->paginate($perPage);
+
         return response()->json([
-            'status' => 'success',
-            'data' => $articles,
-        ], 200);
+            'data' => $articles->items(),
+            'status' => true,
+            'meta' => [
+                'current_page' => $articles->currentPage(),
+                'last_page' => $articles->lastPage(),
+                'per_page' => $articles->perPage(),
+                'total' => $articles->total(),
+            ]
+        ]);
     }
 
     public function store(Request $request)

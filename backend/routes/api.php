@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\ToggleController;
 
@@ -13,11 +14,15 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/client/blogs', [ClientController::class, 'blogs']);
 Route::get('/client/blogs/{slug}', [ClientController::class, 'blogDetail']);
+Route::get('/client/articles', [ClientController::class, 'articles']);
+Route::get('/client/articles/{slug}', [ClientController::class, 'articleDetail']);
+Route::get('/client/blogs/{blog}/comments', [CommentController::class, 'index']);
 
 Route::middleware('auth:api')->group(function () {
 
     Route::put('/toggle-field/{model}/{id}', [ToggleController::class, 'toggleField']);
     Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
+    Route::post('/blogs/{blog}/comments', [CommentController::class, 'store']);
 
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
