@@ -22,7 +22,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::put('/toggle-field/{model}/{id}', [ToggleController::class, 'toggleField']);
     Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
+    
     Route::post('/blogs/{blog}/comments', [CommentController::class, 'store']);
+    Route::put('/blogs/{blog}/comments/{comment}', [CommentController::class, 'update']);
+    Route::delete('/blogs/{blog}/comments/{comment}', [CommentController::class, 'destroy']);
 
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);

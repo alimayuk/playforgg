@@ -68,7 +68,7 @@ class BlogController extends Controller
                 'title' => 'required|string|max:255',
                 'category_id' => 'required|exists:categories,id',
                 'content' => 'required|string',
-                'image' => 'nullable|image|max:2048',
+                'image' => 'nullable|image',
                 'status' => 'boolean',
                 'views' => 'integer',
                 'locale' => 'string|max:2',
@@ -101,7 +101,7 @@ class BlogController extends Controller
                     $content = str_replace('storage/temp/' . $filename, 'storage/uploads/' . $filename, $content);
                 }
             }
-
+ 
             Blog::create([
                 'author_id' => $request->user()->id,
                 'category_id' => $request->category_id,
@@ -258,7 +258,7 @@ class BlogController extends Controller
 
     private function extractUsedImages($content)
     {
-        preg_match_all('/(?:http[s]?:\/\/[^)\s"]+)?storage\/uploads\/([a-zA-Z0-9\-_]+\.(jpg|jpeg|png|webp|gif))(?:\?[^\s)]*)?/', $content, $matches);
+        preg_match_all('/(?:http[s]?:\/\/[^)\s"]+)?storage\/uploads\/([a-zA-Z0-9\-_]+\.(jpg|jpeg|png|webp|gif|avif))(?:\?[^\s)]*)?/', $content, $matches);
 
         return $matches[1] ?? [];
     }

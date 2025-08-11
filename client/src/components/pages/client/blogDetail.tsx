@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getCookie } from 'cookies-next';
 import { useUserStore } from '@/stores/userStore';
+import { CommentsService } from '@/customServices/comments.service';
 
 type ReplyType = {
     id: number;
@@ -73,7 +74,7 @@ export default function BlogDetailPage({ initialData }: Props) {
     const [editText, setEditText] = useState("");
     const [editingReply, setEditingReply] = useState<number | null>(null);
     const [editReplyText, setEditReplyText] = useState("");
-    // Yorumları yükle
+    
     useEffect(() => {
         const fetchComments = async () => {
             try {
@@ -89,64 +90,13 @@ export default function BlogDetailPage({ initialData }: Props) {
         };
         fetchComments();
     }, [blog.id]);
-    const handleDeleteComment = async (commentId: number) => {
-        if (!confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
-        try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${commentId}`,
-                {
-                    method: "DELETE",
-                    credentials: "include"
-                }
-            );
-            if (!res.ok) throw new Error("Silme başarısız");
-            setComments(prev => prev.filter(c => c.id !== commentId));
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleUpdateComment = async (commentId: number) => {
-        if (!editText.trim()) return;
-        try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${commentId}`,
-                {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ text: editText })
-                }
-            );
-            if (!res.ok) throw new Error("Güncelleme başarısız");
-            const updated = await res.json();
-            setComments(prev =>
-                prev.map(c => (c.id === commentId ? { ...c, text: updated.text } : c))
-            );
-            setEditingComment(null);
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const handleAddComment = async () => {
         if (!commentText.trim()) return;
         setLoading(true);
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({ text: commentText })
-                }
-            );
-            if (!res.ok) throw new Error('Yorum eklenemedi');
-            const newComment = await res.json();
-            setComments((prev) => [newComment, ...prev]);
+            const newComment: any = await CommentsService.addComment(blog.id, commentText);
+            setComments(prev => [newComment, ...prev]);
             setCommentText('');
         } catch (err) {
             console.error(err);
@@ -159,21 +109,9 @@ export default function BlogDetailPage({ initialData }: Props) {
         if (!replyText.trim()) return;
         setLoading(true);
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({ text: replyText, parent_id: commentId })
-                }
-            );
-            if (!res.ok) throw new Error('Yanıt eklenemedi');
-            const newReply = await res.json();
-            setComments((prev) =>
-                prev.map((c) =>
+            const newReply: any = await CommentsService.addReply(blog.id, commentId, replyText);
+            setComments(prev =>
+                prev.map(c =>
                     c.id === commentId
                         ? { ...c, replies: [...c.replies, newReply] }
                         : c
@@ -187,42 +125,24 @@ export default function BlogDetailPage({ initialData }: Props) {
             setLoading(false);
         }
     };
-    const handleEditReply = (reply: any) => {
-        setActiveReply(reply.id);
-        setReplyText(reply.text);
-    };
-    const handleDeleteReply = async (replyId: number) => {
-        if (!confirm("Bu yanıtı silmek istediğinizden emin misiniz?")) return;
+
+    const handleUpdateComment = async (commentId: number) => {
+        if (!editText.trim()) return;
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${replyId}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-            if (!res.ok) throw new Error("Silme başarısız");
+            const updated = await CommentsService.updateComment(blog.id, commentId, editText);
             setComments(prev =>
-                prev.map(c => ({
-                    ...c,
-                    replies: c.replies.filter(r => r.id !== replyId)
-                }))
+                prev.map(c => (c.id === commentId ? { ...c, text: updated.text } : c))
             );
+            setEditingComment(null);
         } catch (err) {
             console.error(err);
         }
     };
+
     const handleUpdateReply = async (replyId: number) => {
         if (!editReplyText.trim()) return;
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${blog.id}/comments/${replyId}`,
-                {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ text: editReplyText })
-                }
-            );
-            if (!res.ok) throw new Error("Yanıt güncellenemedi");
-            const updated = await res.json();
+            const updated = await CommentsService.updateReply(blog.id, replyId, editReplyText);
             setComments(prev =>
                 prev.map(c => ({
                     ...c,
@@ -236,6 +156,32 @@ export default function BlogDetailPage({ initialData }: Props) {
             console.error(err);
         }
     };
+
+    const handleDeleteComment = async (commentId: number) => {
+        if (!confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
+        try {
+            await CommentsService.deleteComment(blog.id, commentId);
+            setComments(prev => prev.filter(c => c.id !== commentId));
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteReply = async (replyId: number) => {
+        if (!confirm("Bu yanıtı silmek istediğinizden emin misiniz?")) return;
+        try {
+            await CommentsService.deleteReply(blog.id, replyId);
+            setComments(prev =>
+                prev.map(c => ({
+                    ...c,
+                    replies: c.replies.filter(r => r.id !== replyId)
+                }))
+            );
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
         <div className="max-w-screen-2xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* Main Content */}
