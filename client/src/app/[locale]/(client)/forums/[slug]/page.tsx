@@ -1,75 +1,59 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Title from '@/components/Title';
+import {usePathname } from 'next/navigation'; // sayfa parametresi için
+import { ForumComment, ForumService, ForumTopicDetail } from '@/customServices/forms.service';
+import { ClientService } from '@/customServices/client.service';
 
 const ForumDetailPage = () => {
-  const post = {
-    id: 1,
-    user: 'GamerTR',
-    date: '04.07.2025',
-    message: "CS2'de AWP nerf'ü hakkında ne düşünüyorsunuz?",
-  };
-
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      user: 'CSFan',
-      date: '04.07.2025',
-      message: 'Gerçekten AWP çok zayıfladı...',
-      replies: [
-        {
-          id: 101,
-          user: 'SniperKing',
-          date: '04.07.2025',
-          message: 'Katılıyorum, eski gücü kalmadı.',
-        },
-      ],
-    },
-  ]);
-
+  const pathname = usePathname(); // örn: /forums/1
+  const topicId = Number(pathname?.split('/').pop());
+  const [post, setPost] = useState<ForumTopicDetail | null>(null);
+  const [comments, setComments] = useState<ForumComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [replyInputs, setReplyInputs] = useState<{ [key: number]: string }>({});
   const [replyVisibility, setReplyVisibility] = useState<{ [key: number]: boolean }>({});
   const [filter, setFilter] = useState<'newest' | 'oldest'>('newest');
+  const [loading, setLoading] = useState(false);
 
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    const newEntry = {
-      id: Date.now(),
-      user: 'Kullanıcı',
-      date: new Date().toLocaleDateString('tr-TR'),
-      message: newComment,
-      replies: [],
-    };
-    setComments([newEntry, ...comments]);
-    setNewComment('');
+  useEffect(() => {
+    if (!topicId) return;
+    setLoading(true);
+    ClientService.getTopicClient(topicId)
+      .then((data) => {
+        setPost(data);
+        setComments(data.comments);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [topicId]);
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !topicId) return;
+    try {
+      const createdComment = await ForumService.addComment(topicId, newComment.trim());
+      setComments([createdComment, ...comments]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Yorum eklenemedi:', error);
+    }
   };
 
-  const handleAddReply = (commentId: number) => {
+  const handleAddReply = async (commentId: number) => {
     const replyText = replyInputs[commentId];
-    if (!replyText?.trim()) return;
-
-    setComments((prev) =>
-      prev.map((c) =>
-        c.id === commentId
-          ? {
-              ...c,
-              replies: [
-                ...c.replies,
-                {
-                  id: Date.now(),
-                  user: 'Yanıtlayan',
-                  date: new Date().toLocaleDateString('tr-TR'),
-                  message: replyText,
-                },
-              ],
-            }
-          : c
-      )
-    );
-
-    setReplyInputs({ ...replyInputs, [commentId]: '' });
-    setReplyVisibility({ ...replyVisibility, [commentId]: false });
+    if (!replyText?.trim() || !topicId) return;
+    try {
+      const createdReply = await ForumService.addComment(topicId, replyText.trim(), commentId);
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, replies: [...c.replies, createdReply] } : c
+        )
+      );
+      setReplyInputs({ ...replyInputs, [commentId]: '' });
+      setReplyVisibility({ ...replyVisibility, [commentId]: false });
+    } catch (error) {
+      console.error('Yanıt eklenemedi:', error);
+    }
   };
 
   const toggleReplyVisibility = (commentId: number) => {
@@ -84,6 +68,9 @@ const ForumDetailPage = () => {
       ? [...comments].sort((a, b) => b.id - a.id)
       : [...comments].sort((a, b) => a.id - b.id);
 
+  if (loading) return <p className="text-center py-20">Yükleniyor...</p>;
+  if (!post) return <p className="text-center py-20">Gönderi bulunamadı.</p>;
+
   return (
     <div className="max-w-screen-2xl mx-auto px-4 py-12 space-y-8">
       <Title title1="Forum" title2="Gönderisi" />
@@ -91,10 +78,11 @@ const ForumDetailPage = () => {
       {/* Gönderi */}
       <div className="bg-gray-900 text-white rounded-lg p-6 shadow border border-gray-700">
         <div className="flex justify-between text-sm text-gray-400 mb-2">
-          <span>@{post.user}</span>
-          <span>{post.date}</span>
+          <span>@{post.user?.username || 'Bilinmeyen'}</span>
+          <span>{new Date(post.created_at).toLocaleDateString('tr-TR')}</span>
         </div>
-        <p className="text-lg">{post.message}</p>
+        <h1 className="text-xl font-semibold mb-2">{post.title}</h1>
+        <p className="text-lg">{post.content}</p>
       </div>
 
       {/* Yorum Ekle */}
@@ -138,10 +126,13 @@ const ForumDetailPage = () => {
       {/* Yorumlar */}
       <div className="space-y-6">
         {sortedComments.map((comment) => (
-          <div key={comment.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
+          <div
+            key={comment.id}
+            className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3"
+          >
             <div className="flex justify-between text-sm text-gray-400 mb-1">
-              <span>@{comment.user}</span>
-              <span>{comment.date}</span>
+              <span>@{comment.user?.name || 'Bilinmeyen'}</span>
+              <span>{new Date(comment.date).toLocaleDateString('tr-TR')}</span>
             </div>
             <p className="text-white">{comment.message}</p>
 
@@ -152,8 +143,8 @@ const ForumDetailPage = () => {
                 className="ml-4 mt-3 border-l-2 border-orange-500 pl-4 text-sm text-gray-300"
               >
                 <div className="flex justify-between text-xs mb-1">
-                  <span>@{reply.user}</span>
-                  <span>{reply.date}</span>
+                  <span>@{reply.user?.name || 'Bilinmeyen'}</span>
+                  <span>{new Date(reply.date).toLocaleDateString('tr-TR')}</span>
                 </div>
                 <p>{reply.message}</p>
               </div>
@@ -167,7 +158,7 @@ const ForumDetailPage = () => {
               {replyVisibility[comment.id] ? 'İptal' : 'Yanıtla'}
             </button>
 
-            {/* Yanıtla alanı (gizli/görünür) */}
+            {/* Yanıtla alanı */}
             {replyVisibility[comment.id] && (
               <div className="mt-2 space-y-2">
                 <textarea

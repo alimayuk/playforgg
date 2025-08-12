@@ -20,22 +20,20 @@ export async function middleware(request: NextRequest) {
     (loc) => pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)
   );
 
+  // Redirect to default locale if no locale in path
   if (pathname === '/') {
-    const localeFromCookie: any | undefined = request.cookies.get('NEXT_LOCALE')?.value;
-
+    const localeFromCookie = request.cookies.get('NEXT_LOCALE')?.value;
     const preferredLocale = locales.includes(localeFromCookie ?? '')
       ? localeFromCookie
       : defaultLocale;
-
     return NextResponse.redirect(new URL(`/${preferredLocale}`, request.url));
   }
 
   if (!locale) {
-    const localeFromCookie: any | undefined = request.cookies.get('NEXT_LOCALE')?.value;
+    const localeFromCookie = request.cookies.get('NEXT_LOCALE')?.value;
     const preferredLocale = locales.includes(localeFromCookie ?? '')
       ? localeFromCookie
       : defaultLocale;
-
     return NextResponse.redirect(new URL(`/${preferredLocale}${pathname}`, request.url));
   }
 
@@ -51,24 +49,39 @@ export async function middleware(request: NextRequest) {
     pathWithoutLocale.startsWith(`/${path}`)
   );
 
-  if (isAuthPage) {
-    if (!hasVerifiedToken) {
+  // Handle invalid token cases
+  // middleware.ts
+  if (token && !hasVerifiedToken) {
+    if (isProtectedPath) {
+      const response = NextResponse.redirect(
+        new URL(`/${locale}/login?next=${encodeURIComponent(pathname)}`, request.url)
+      );
+      response.cookies.delete('c');
+      response.cookies.delete('token');
+      return response;
+    } else {
       const response = NextResponse.next();
       response.cookies.delete('c');
+      response.cookies.delete('token');
+      // Client tarafında state'in temizlendiğini anlaması için bir header ekleyelim
+      response.headers.set('x-clear-auth', 'true');
       return response;
     }
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
+  // Auth pages handling
+  if (isAuthPage) {
+    if (hasVerifiedToken) {
+      return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Protected paths handling
   if (isProtectedPath && !hasVerifiedToken) {
-    const loginUrl = new URL(
-      `/${locale}/login?next=${encodeURIComponent(pathname)}`,
-      request.url
+    return NextResponse.redirect(
+      new URL(`/${locale}/login?next=${encodeURIComponent(pathname)}`, request.url)
     );
-    const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete('c');
-    response.cookies.delete('token');
-    return response;
   }
 
   return intlMiddleware(request);

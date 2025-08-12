@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Blog;
 use App\Models\Category;
+use App\Models\ForumTopic;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -262,5 +263,20 @@ class ClientController extends Controller
             'otherArticles' => $otherArticles,
             'status' => 'success'
         ]);
+    }
+
+    public function forumsIndex()
+    {
+        $forums = ForumTopic::with('user', 'category')->where('status', 1)->latest()->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => $forums
+        ], 200);
+    }
+
+    public function forumsDetail(ForumTopic $topic)
+    {
+        $topic->increment('views');
+        return $topic->load(['user', 'comments.user', 'comments.replies.user']);
     }
 }

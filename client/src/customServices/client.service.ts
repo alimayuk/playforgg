@@ -1,4 +1,5 @@
 import { getCookie } from "cookies-next";
+import { ForumTopic } from "./forms.service";
 
 interface FetchOptions extends RequestInit {
     headers?: HeadersInit;
@@ -102,5 +103,13 @@ export const ClientService = {
         );
 
         return data;
-    }
+    },
+
+    getAllTopicsClient: async (): Promise<ForumTopic[]> => {
+        return fetchWithAuth<ForumTopic[]>(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/forums`);
+    },
+
+    getTopicClient: async (id: number): Promise<ForumTopic> => {
+        return fetchWithAuth<ForumTopic>(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/forums/${id}`);
+    },
 };

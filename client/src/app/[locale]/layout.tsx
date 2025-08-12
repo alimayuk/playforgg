@@ -5,6 +5,8 @@ import '../globals.css';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { getUser } from '../lib/getUser';
 import UserHydration from '@/components/UserHydration';
+import AuthListener from '@/components/AuthListener';
+
 export default async function LocaleLayout({
   children,
   params
@@ -12,7 +14,6 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
@@ -23,7 +24,11 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body suppressHydrationWarning={true}>
         <NextIntlClientProvider>
-          <AntdRegistry><UserHydration user={user} />{children}</AntdRegistry>
+          <AntdRegistry>
+            <UserHydration user={user} />
+            <AuthListener />
+            {children}
+          </AntdRegistry>
         </NextIntlClientProvider>
       </body>
     </html>
