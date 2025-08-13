@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Blog } from '@/customServices/client.service';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import Empty from '@/components/Empty';
+import Loading from '@/components/Loading';
 
 interface Category {
     id: number;
@@ -66,6 +68,7 @@ const BlogPage: React.FC<Props> = ({ initialData }) => {
 
         fetchFiltered();
     }, [selectedCategory, currentPage]);
+    
     useEffect(() => {
         const params = new URLSearchParams();
         if (selectedCategory !== 'tum') params.set('category', selectedCategory);
@@ -107,11 +110,13 @@ const BlogPage: React.FC<Props> = ({ initialData }) => {
                     ))}
                 </select>
             </div>
-            {loading ? (
-                <p>Yükleniyor</p>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-                    {blogs.map((blog) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                {loading ? (
+                    <div className="col-span-full">
+                        <Loading />
+                    </div>
+                ) : blogs.length > 0 ? (
+                    blogs.map((blog) => (
                         <div
                             key={blog.id}
                             className="bg-[#1e293b] rounded-xl shadow-md hover:shadow-lg transition"
@@ -140,9 +145,16 @@ const BlogPage: React.FC<Props> = ({ initialData }) => {
                                 </Link>
                             </div>
                         </div>
-                    ))}
-                </div>
-            )}
+                    ))
+                ) : (
+                    <div className="col-span-full">
+                        <Empty
+                            title="Blog yazısı bulunamadı"
+                            description="Seçtiğiniz kriterlere uygun blog yazısı bulunamadı."
+                        />
+                    </div>
+                )}
+            </div>
 
 
             {/* Sayfalama */}

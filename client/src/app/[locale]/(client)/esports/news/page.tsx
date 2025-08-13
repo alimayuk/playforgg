@@ -21,7 +21,6 @@ const fetchArticles = async () => {
 
 const Page = async () => {
   const articles = await fetchArticles();
-  console.log(articles)
   return <ArticlesPage initialData={articles} />;
 };
 

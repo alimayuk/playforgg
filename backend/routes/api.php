@@ -13,13 +13,20 @@ use App\Http\Controllers\ToggleController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
 Route::get('/client/blogs', [ClientController::class, 'blogs']);
 Route::get('/client/blogs/{slug}', [ClientController::class, 'blogDetail']);
+
 Route::get('/client/articles', [ClientController::class, 'articles']);
 Route::get('/client/articles/{slug}', [ClientController::class, 'articleDetail']);
+
 Route::get('/client/blogs/{blog}/comments', [CommentController::class, 'index']);
+
 Route::get('/client/forums', [ClientController::class, 'forumsIndex']);
 Route::get('/client/forums/{topic}', [ClientController::class, 'forumsDetail']);
+
+Route::get('/client/games', [ClientController::class, 'gamesIndex']);
+Route::get('/client/games/{slug}', [ClientController::class, 'gamesDetail']);
 
 Route::middleware('auth:api')->group(function () {
 

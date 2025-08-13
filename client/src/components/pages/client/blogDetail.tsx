@@ -74,7 +74,7 @@ export default function BlogDetailPage({ initialData }: Props) {
     const [editText, setEditText] = useState("");
     const [editingReply, setEditingReply] = useState<number | null>(null);
     const [editReplyText, setEditReplyText] = useState("");
-    
+
     useEffect(() => {
         const fetchComments = async () => {
             try {

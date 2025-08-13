@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Models\ForumTopic;
+use App\Models\Game;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -278,5 +279,149 @@ class ClientController extends Controller
     {
         $topic->increment('views');
         return $topic->load(['user', 'comments.user', 'comments.replies.user']);
+    }
+
+    public function gamesIndex(Request $request)
+    {
+        $locale = $request->get('locale', 'tr');
+        $perPage = (int) $request->get('perPage', 9);
+        $categorySlug = $request->get('category');
+
+        $query = Game::with(['category' => function ($q) {
+            $q->select('id', 'title', 'slug');
+        }, 'user' => function ($q) {
+            $q->select('id', 'username');
+        }])
+            ->where('status', 1)
+            ->where('locale', $locale)
+            ->select([
+                'id',
+                'author_id',
+                'category_id',
+                'title',
+                'slug',
+                'image',
+                'content',
+                'status',
+                'views',
+                'excerpt',
+                'locale',
+                'created_at',
+            ])
+            ->whereHas('category', function ($q) {
+                $q->where('status', 1);
+            })
+            ->orderBy('created_at', 'desc');
+
+        if ($categorySlug && $categorySlug !== 'tum') {
+            $query->whereHas('category', function ($q) use ($categorySlug) {
+                $q->where('slug', $categorySlug);
+            });
+        }
+
+        $games = $query->paginate($perPage);
+
+        $categories = Category::where('status', 1)
+            ->where('locale', $locale)
+            ->select(['id', 'title', 'slug'])
+            ->orderBy('title')
+            ->get();
+
+        return response()->json([
+            'data' => $games->items(),
+            'categories' => $categories,
+            'status' => 'success',
+            'meta' => [
+                'current_page' => $games->currentPage(),
+                'last_page' => $games->lastPage(),
+                'per_page' => $games->perPage(),
+                'total' => $games->total(),
+            ],
+        ]);
+    }
+    public function gamesDetail(Request $request, $slug)
+    {
+        $locale = $request->get('locale', 'tr');
+        if (!Game::where('slug', $slug)->where('locale', 1)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Bulunamadı.'
+            ], 404);
+        }
+        $game = Game::with(['category:id,title,slug', 'user:id,username'])
+            ->where('slug', $slug)
+            ->where('locale', $locale)
+            ->where('status', 1)
+            ->firstOrFail([
+                'id',
+                'author_id',
+                'category_id',
+                'title',
+                'slug',
+                'image',
+                'content',
+                'status',
+                'views',
+                'locale',
+                'created_at'
+            ]);
+
+
+        $otherGames = Game::with(['category:id,title,slug', 'user:id,username'])
+            ->where('status', 1)
+            ->where('locale', $locale)
+            ->where('id', '!=', $game->id)
+            ->where('category_id', $game->category_id)
+            ->latest()
+            ->take(3)
+            ->get([
+                'id',
+                'title',
+                'slug',
+                'image',
+                'created_at',
+                'category_id'
+            ])
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'slug' => $item->slug,
+                    'image' => $item->image,
+                    'date' => $item->created_at->format('d.m.Y'),
+                    'category' => [
+                        'id' => $item->category->id ?? null,
+                        'title' => $item->category->title ?? null,
+                        'slug' => $item->category->slug ?? null,
+                    ],
+                    'user' => [
+                        'id' => $item->category->id ?? null,
+                        'username' => $item->category->username ?? 'Bilinmiyor',
+                    ],
+                ];
+            });
+
+        return response()->json([
+            'data' => [
+                'id' => $game->id,
+                'title' => $game->title,
+                'slug' => $game->slug,
+                'image' => $game->image,
+                'content' => $game->content,
+                'views' => $game->views,
+                'date' => $game->created_at->format('d.m.Y'),
+                'category' => [
+                    'id' => $game->category->id ?? null,
+                    'title' => $game->category->title ?? null,
+                    'slug' => $game->category->slug ?? null,
+                ],
+                'user' => [
+                    'id' => $game->category->id ?? null,
+                    'username' => $game->user->username ?? 'Bilinmiyor',
+                ],
+            ],
+            'otherGames' => $otherGames,
+            'status' => 'success'
+        ]);
     }
 }

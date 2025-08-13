@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Menu, X as CloseIcon, User } from 'lucide-react';
 import { useUserStore } from '@/stores/userStore';
+import { jwtTokenCreate } from '@/utils/jwtTokenCreate';
 
 interface MenuItem {
   title: string;
@@ -22,7 +23,7 @@ export default function Navbar() {
   const [modalType, setModalType] = useState<'login' | 'register' | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(0);
-
+  const { setUser } = useUserStore();
   useEffect(() => {
     setWindowWidth(window.innerWidth);
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -58,12 +59,34 @@ export default function Navbar() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Login işlemini burada gerçekleştir
-      // Başarılı olursa:
-      // setUser(response.data.user);
-      setModalType(null);
+      const res = await UsersService.login({
+        username,
+        password
+      });
+
+      if (res.status === 'success' && res.user) {
+        // 1. JWT token'ı oluştur ve cookie'ye kaydet
+        await jwtTokenCreate(res.user);
+
+        // 2. Zustand store'u güncelle
+        setUser(res.user); // Burada res.data.user yerine res.user kullanıyoruz
+
+        // 3. Form state'lerini temizle
+        setPassword('');
+        setUsername('');
+        setError(null);
+
+        // 4. Modal'ı kapat
+        setModalType(null);
+
+        // 5. Sayfayı yenile (isteğe bağlı)
+        // window.location.reload(); // Veya router.refresh() kullanabilirsiniz
+      } else {
+        setError(res?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
+      }
     } catch (error) {
       setError("Giriş başarısız. Bilgilerinizi kontrol edin.");
+      console.error("Login error:", error);
     }
   };
 
@@ -174,10 +197,16 @@ export default function Navbar() {
                   <input
                     type="text"
                     placeholder="Kullanıcı Adı"
+                    name='username'
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="w-full border border-gray-300 p-2 rounded"
                   />
                   <input
                     type="password"
+                    name='password'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Şifre"
                     className="w-full border border-gray-300 p-2 rounded"
                   />
