@@ -14,22 +14,25 @@ use App\Http\Controllers\ToggleController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/client/blogs', [ClientController::class, 'blogs']);
-Route::get('/client/blogs/{slug}', [ClientController::class, 'blogDetail']);
+Route::prefix('/client')->group(function () {
+    Route::get('/home', [ClientController::class, 'homePageData']);
 
-Route::get('/client/articles', [ClientController::class, 'articles']);
-Route::get('/client/articles/{slug}', [ClientController::class, 'articleDetail']);
+    Route::get('/blogs', [ClientController::class, 'blogs']);
+    Route::get('/blogs/{slug}', [ClientController::class, 'blogDetail']);
 
-Route::get('/client/blogs/{blog}/comments', [CommentController::class, 'index']);
+    Route::get('/articles', [ClientController::class, 'articles']);
+    Route::get('/articles/{slug}', [ClientController::class, 'articleDetail']);
 
-Route::get('/client/forums', [ClientController::class, 'forumsIndex']);
-Route::get('/client/forums/{topic}', [ClientController::class, 'forumsDetail']);
+    Route::get('/blogs/{blog}/comments', [ClientController::class, 'commentsIndex']);
 
-Route::get('/client/games', [ClientController::class, 'gamesIndex']);
-Route::get('/client/games/{slug}', [ClientController::class, 'gamesDetail']);
+    Route::get('/forums', [ClientController::class, 'forumsIndex']);
+    Route::get('/forums/{topic}', [ClientController::class, 'forumsDetail']);
 
-Route::middleware('auth:api')->group(function () {
+    Route::get('/games', [ClientController::class, 'gamesIndex']);
+    Route::get('/games/{slug}', [ClientController::class, 'gamesDetail']);
+});
 
+Route::middleware(['auth:api', 'global.throttle:60,1'])->group(function () {
     Route::put('/toggle-field/{model}/{id}', [ToggleController::class, 'toggleField']);
     Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
 
@@ -40,10 +43,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::get('/categories', [CategoryController::class, 'index']);       // ?locale=tr
-    Route::post('/categories', [CategoryController::class, 'store']);      // body'de locale: 'tr'
-    Route::put('/categories/{id}', [CategoryController::class, 'update']); // body'de locale (opsiyonel)
-    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']); // ?locale=tr
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 
     Route::get('/blogs', [BlogController::class, 'index']);
     Route::get('/blogs/{id}', [BlogController::class, 'show']);
@@ -62,7 +65,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/articles', [ArticleController::class, 'store']);
     Route::post('/articles/{id}', [ArticleController::class, 'update']);
     Route::delete('/articles/{id}', [ArticleController::class, 'destroy']);
-
 
     Route::get('/forums', [ForumController::class, 'index']);
     Route::post('/forums', [ForumController::class, 'store']);

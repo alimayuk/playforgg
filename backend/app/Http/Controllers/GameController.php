@@ -127,7 +127,7 @@ class GameController extends Controller
                 'title' => 'required|string|max:255',
                 'category_id' => 'required|exists:categories,id',
                 'content' => 'required|string',
-                'image' => 'nullable|image|max:2048',
+                'image' => 'nullable|image',
                 'status' => 'boolean',
                 'locale' => 'string|max:2',
                 'excerpt' => 'nullable|string|max:500',

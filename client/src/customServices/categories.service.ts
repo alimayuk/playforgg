@@ -12,10 +12,10 @@ const fetchWithAuth = async <T = any>(
     url: string,
     options: RequestInit = {}
 ): Promise<T> => {
-    
+
     const headers = new Headers(options.headers);
 
-    
+
     if (options.body && !(options.body instanceof FormData)) {
         headers.set("Content-Type", "application/json");
     }
@@ -44,7 +44,15 @@ export interface Category {
     locale: string;
     [key: string]: any;
 }
-
+export interface FeaturedCategories {
+    id: number;
+    title: string;
+    slug: string;
+    icon: string;
+    image: string;
+    locale: string;
+    [key: string]: any;
+}
 export const CategoriesService = {
 
     getCategories: async (
@@ -52,7 +60,7 @@ export const CategoriesService = {
         page: number = 1,
         per_page: number = 5
     ): Promise<{ data: Category[]; status: boolean; meta?: any }> => {
-        
+
         const queryLocale = locale && locale !== "hepsi" ? locale : "hepsi";
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/categories?locale=${queryLocale}&page=${page}&per_page=${per_page}`;
 
@@ -81,7 +89,7 @@ export const CategoriesService = {
     },
 
     createCategory: async (values: Record<string, any>): Promise<{ data: Category }> => {
-        
+
         const isFormData = values instanceof FormData;
 
         return fetchWithAuth<{ data: Category }>(
@@ -100,7 +108,7 @@ export const CategoriesService = {
         const isFormData = values instanceof FormData;
 
         if (isFormData) {
-            values.append("_method", "PUT"); 
+            values.append("_method", "PUT");
         }
 
         return fetchWithAuth<{ data: Category }>(

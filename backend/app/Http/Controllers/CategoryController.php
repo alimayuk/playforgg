@@ -96,8 +96,8 @@ class CategoryController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:300|unique:categories,slug,' . $id,
-            'image' => 'nullable|image|max:2048',
-            'icon' => 'nullable|image|max:2048',
+            'image' => 'nullable|image',
+            'icon' => 'nullable|image',
             'status' => 'nullable|boolean',
             'featured' => 'nullable|boolean',
             'locale' => 'nullable|in:tr,en',

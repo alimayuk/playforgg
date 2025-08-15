@@ -424,4 +424,94 @@ class ClientController extends Controller
             'status' => 'success'
         ]);
     }
+
+    public function commentsIndex(Blog $blog)
+    {
+        $comments = $blog->comments()
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->get();
+
+        return response()->json($comments);
+    }
+
+    public function homePageData(Request $request)
+    {
+        $locale = $request->get('locale', 'tr');
+
+        $blogs = Blog::with([
+            'category' => fn($q) => $q->select('id', 'title', 'locale')->where('locale', $locale),
+            'user' => fn($u) => $u->select('id', 'username')
+        ])
+            ->where('status', 1)
+            ->where('locale', $locale)
+            ->select([
+                'id',
+                'author_id',
+                'category_id',
+                'title',
+                'slug',
+                'image',
+                'comment_count',
+                'excerpt',
+                'locale',
+                'created_at'
+            ])
+            ->whereHas(
+                'category',
+                fn($q) => $q
+                    ->where('status', 1)
+                    ->where('locale', $locale)
+            )
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        $games = Game::with([
+            'category' => fn($q) => $q->select('id', 'title', 'locale')->where('locale', $locale)
+        ])
+            ->where('status', 1)
+            ->where('locale', $locale)
+            ->select([
+                'id',
+                'author_id',
+                'category_id',
+                'title',
+                'slug',
+                'image',
+                'excerpt',
+                'locale',
+                'created_at'
+            ])
+            ->whereHas(
+                'category',
+                fn($q) => $q
+                    ->where('status', 1)
+                    ->where('locale', $locale)
+            )
+            ->orderBy('created_at', 'desc')
+            ->take(7)
+            ->get();
+
+        $featuredCategories = Category::where('status', 1)
+            ->where('featured', 1)
+            ->where('locale', $locale)
+            ->select('id', 'title', 'slug', 'image', 'icon')
+            ->orderBy('title')
+            ->take(6)
+            ->get();
+        $categories = Category::where('status', 1)
+            ->where('locale', $locale)
+            ->select('id', 'title', 'slug')
+            ->orderBy('title')
+            ->take(9)
+            ->get();
+        return response()->json([
+            'blogs' => $blogs,
+            'games' => $games,
+            'categories' => $categories,
+            'featuredCategories' => $featuredCategories,
+            'status' => 'success'
+        ]);
+    }
 }

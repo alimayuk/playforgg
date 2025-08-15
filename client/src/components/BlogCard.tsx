@@ -3,6 +3,8 @@ import Link from 'next/link';
 
 export interface BlogPost {
   id: string | number;
+  author: string;
+  slug: string;
   title: string;
   image: string;
   date: string;
@@ -20,7 +22,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
     >
       {/* Arka plan resmi */}
       <img
-        src={post.image}
+        src={`${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${post.image}`}
         alt={post.title}
         className="absolute inset-0 w-full h-full object-cover -z-10 transition-transform duration-500 group-hover:scale-105"
       />
@@ -33,7 +35,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         {/* Başlık */}
         <div className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 space-y-1">
           <h3>{post.title}</h3>
-        <p className="text-gray-400 text-sm">Ali Mayuk</p>
+          <p className="text-gray-400 text-sm">{post.author}</p>
         </div>
         {/* Tarih ve link */}
         <div
@@ -44,7 +46,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
             {post.date}
           </time>
           <Link
-            href={`/post/${post.id}`}
+            href={`/blogs/${post.slug}`}
             className="text-orange-400 hover:text-orange-200 font-medium text-sm transition"
           >
             Devamını Oku →

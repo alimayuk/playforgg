@@ -68,8 +68,34 @@ const fetchWithoutAuth = async <T = any>(
         throw error; ""
     }
 };
+export interface HomePageData {
+    blogs: Blog[];
+    games: Game[];
+    categories: Category[];
+    status: string;
+}
 
+export interface Game {
+    id: number;
+    title: string;
+    image: string;
+    // diğer özellikler...
+}
+
+export interface Category {
+    id: number;
+    title: string;
+    slug: string;
+}
 export const ClientService = {
+
+    getHomePageData: async (): Promise<HomePageData> => {
+        const locale = getLocale();
+        const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/client/home?locale=${locale}`;
+
+        const response = await fetchWithoutAuth<HomePageData>(url);
+        return response;
+    },
 
     getBlogs: async (
         locale: string = 'tr',
