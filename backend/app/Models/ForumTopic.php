@@ -28,7 +28,7 @@ class ForumTopic extends Model
 
     public function comments()
     {
-        return $this->hasMany(ForumComment::class, 'topic_id')->whereNull('parent_id');
+        return $this->morphMany(Comment::class, 'commentable')->whereNull('parent_id');
     }
 
     public function scopeRecentPerUser($query, $userId, $limit = 3)

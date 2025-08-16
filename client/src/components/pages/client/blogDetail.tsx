@@ -74,14 +74,14 @@ export default function BlogDetailPage({ initialData }: Props) {
     const [editText, setEditText] = useState("");
     const [editingReply, setEditingReply] = useState<number | null>(null);
     const [editReplyText, setEditReplyText] = useState("");
-
+    const type = 'blogs';
+    const id = blog.id; // zaten mevcut
     useEffect(() => {
         const fetchComments = async () => {
             try {
                 const res = await fetch(
                     `${process.env.NEXT_PUBLIC_SERVER_URL}/client/blogs/${blog.id}/comments`
                 );
-                if (!res.ok) throw new Error('Yorumlar yüklenemedi');
                 const data = await res.json();
                 setComments(data);
             } catch (err) {
@@ -91,11 +91,12 @@ export default function BlogDetailPage({ initialData }: Props) {
         fetchComments();
     }, [blog.id]);
 
+    // Comment ekleme
     const handleAddComment = async () => {
         if (!commentText.trim()) return;
         setLoading(true);
         try {
-            const newComment: any = await CommentsService.addComment(blog.id, commentText);
+            const newComment = await CommentsService.addComment(type, id, commentText);
             setComments(prev => [newComment, ...prev]);
             setCommentText('');
         } catch (err) {
@@ -105,15 +106,16 @@ export default function BlogDetailPage({ initialData }: Props) {
         }
     };
 
+    // Reply ekleme
     const handleAddReply = async (commentId: number) => {
         if (!replyText.trim()) return;
         setLoading(true);
         try {
-            const newReply: any = await CommentsService.addReply(blog.id, commentId, replyText);
+            const newReply = await CommentsService.addReply(type, id, commentId, replyText);
             setComments(prev =>
                 prev.map(c =>
                     c.id === commentId
-                        ? { ...c, replies: [...c.replies, newReply] }
+                        ? { ...c, replies: [...(c.replies || []), newReply] }
                         : c
                 )
             );
@@ -126,61 +128,59 @@ export default function BlogDetailPage({ initialData }: Props) {
         }
     };
 
-    const handleUpdateComment = async (commentId: number) => {
-        if (!editText.trim()) return;
+    // Comment veya Reply güncelleme
+    const handleUpdateCommentOrReply = async (commentId: number, parentId: number | null, text: string) => {
+        if (!text.trim()) return;
         try {
-            const updated = await CommentsService.updateComment(blog.id, commentId, editText);
-            setComments(prev =>
-                prev.map(c => (c.id === commentId ? { ...c, text: updated.text } : c))
-            );
-            setEditingComment(null);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleUpdateReply = async (replyId: number) => {
-        if (!editReplyText.trim()) return;
-        try {
-            const updated = await CommentsService.updateReply(blog.id, replyId, editReplyText);
-            setComments(prev =>
-                prev.map(c => ({
-                    ...c,
-                    replies: c.replies.map(r =>
-                        r.id === replyId ? { ...r, text: updated.text } : r
+            const updated = await CommentsService.updateComment(type, id, commentId, text);
+            if (parentId === null) {
+                // Comment güncelleme
+                setComments(prev =>
+                    prev.map(c => (c.id === commentId ? { ...c, text: updated.text } : c))
+                );
+                setEditingComment(null);
+            } else {
+                // Reply güncelleme
+                setComments(prev =>
+                    prev.map(c =>
+                        c.id === parentId
+                            ? {
+                                ...c,
+                                replies: c.replies?.map(r => r.id === commentId ? { ...r, text: updated.text } : r) || []
+                            }
+                            : c
                     )
-                }))
-            );
-            setEditingReply(null);
+                );
+                setEditingReply(null);
+            }
         } catch (err) {
             console.error(err);
         }
     };
 
-    const handleDeleteComment = async (commentId: number) => {
+    // Comment veya Reply silme
+    const handleDeleteCommentOrReply = async (commentId: number, parentId: number | null) => {
         if (!confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
         try {
-            await CommentsService.deleteComment(blog.id, commentId);
-            setComments(prev => prev.filter(c => c.id !== commentId));
+            await CommentsService.deleteComment(type, id, commentId);
+            if (parentId === null) {
+                // Comment silme
+                setComments(prev => prev.filter(c => c.id !== commentId));
+            } else {
+                // Reply silme
+                setComments(prev =>
+                    prev.map(c =>
+                        c.id === parentId
+                            ? { ...c, replies: c.replies?.filter(r => r.id !== commentId) || [] }
+                            : c
+                    )
+                );
+            }
         } catch (err) {
             console.error(err);
         }
     };
 
-    const handleDeleteReply = async (replyId: number) => {
-        if (!confirm("Bu yanıtı silmek istediğinizden emin misiniz?")) return;
-        try {
-            await CommentsService.deleteReply(blog.id, replyId);
-            setComments(prev =>
-                prev.map(c => ({
-                    ...c,
-                    replies: c.replies.filter(r => r.id !== replyId)
-                }))
-            );
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     return (
         <div className="max-w-screen-2xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -260,7 +260,7 @@ export default function BlogDetailPage({ initialData }: Props) {
                                                 Düzenle
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteComment(comment.id)}
+                                                onClick={() => handleDeleteCommentOrReply(comment.id, null)}
                                                 className="hover:text-red-500"
                                             >
                                                 Sil
@@ -281,7 +281,7 @@ export default function BlogDetailPage({ initialData }: Props) {
                                         />
                                         <div className="flex justify-end gap-2 mt-1">
                                             <button
-                                                onClick={() => handleUpdateComment(comment.id)}
+                                                onClick={() => handleUpdateCommentOrReply(comment.id, null, editText)}
                                                 className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
                                             >
                                                 Kaydet
@@ -326,7 +326,7 @@ export default function BlogDetailPage({ initialData }: Props) {
                                                 />
                                                 <div className="flex gap-2 mt-1">
                                                     <button
-                                                        onClick={() => handleUpdateReply(reply.id)}
+                                                        onClick={() => handleUpdateCommentOrReply(reply.id, comment.id, editReplyText)}
                                                         className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
                                                     >
                                                         Kaydet
@@ -358,7 +358,7 @@ export default function BlogDetailPage({ initialData }: Props) {
                                                     Düzenle
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDeleteReply(reply.id)}
+                                                    onClick={() => handleDeleteCommentOrReply(reply.id, comment.id)}
                                                     className="text-xs text-red-400 hover:underline"
                                                 >
                                                     Sil

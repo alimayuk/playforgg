@@ -8,14 +8,14 @@ class Comment extends Model
 {
     protected $guarded = [];
 
-    public function blog()
+    public function commentable()
     {
-        return $this->belongsTo(Blog::class);
+        return $this->morphTo();
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class,'author_id');
+        return $this->belongsTo(User::class, 'author_id');
     }
 
     public function replies()

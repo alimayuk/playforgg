@@ -492,14 +492,25 @@ class ClientController extends Controller
         ]);
     }
 
-    public function commentsIndex(Blog $blog)
+    public function index($type, $id)
     {
-        $comments = $blog->comments()
+        $model = $this->resolveModel($type)::findOrFail($id);
+
+        $comments = $model->comments()
             ->with(['user', 'replies.user'])
             ->latest()
             ->get();
 
         return response()->json($comments);
+    }
+
+    private function resolveModel($type)
+    {
+        return match ($type) {
+            'blogs' => \App\Models\Blog::class,
+            'forum-topics' => \App\Models\ForumTopic::class,
+            default => abort(404, 'Model bulunamadı')
+        };
     }
 
     public function homePageData(Request $request)

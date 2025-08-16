@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Blog;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function index(Blog $blog)
+    public function index($type, $id)
     {
-        $comments = $blog->comments()
+        $model = $this->resolveModel($type)::findOrFail($id);
+
+        $comments = $model->comments()
             ->with(['user', 'replies.user'])
             ->latest()
             ->get();
@@ -18,14 +19,16 @@ class CommentController extends Controller
         return response()->json($comments);
     }
 
-    public function store(Request $request, Blog $blog)
+    public function store(Request $request, $type, $id)
     {
         $request->validate([
             'text' => 'required|string|max:400',
             'parent_id' => 'nullable|exists:comments,id'
         ]);
 
-        $comment = $blog->comments()->create([
+        $model = $this->resolveModel($type)::findOrFail($id);
+
+        $comment = $model->comments()->create([
             'author_id' => auth()->id(),
             'text' => $request->text,
             'parent_id' => $request->parent_id
@@ -34,29 +37,23 @@ class CommentController extends Controller
         return response()->json($comment->load('user', 'replies'));
     }
 
-     // Yorum veya cevabı güncelleme
-    public function update(Request $request, Blog $blog, Comment $comment)
+    public function update(Request $request, $type, $id, Comment $comment)
     {
         $request->validate([
             'text' => 'required|string|max:400'
         ]);
 
-        // Sadece yorum sahibinin düzenlemesine izin ver
         if ($comment->author_id !== auth()->id()) {
             return response()->json(['error' => 'Bu yorumu düzenleme yetkiniz yok.'], 403);
         }
 
-        $comment->update([
-            'text' => $request->text
-        ]);
+        $comment->update(['text' => $request->text]);
 
         return response()->json($comment->load('user', 'replies'));
     }
 
-    // Yorum veya cevabı silme
-    public function destroy(Blog $blog, Comment $comment)
+    public function destroy($type, $id, Comment $comment)
     {
-        // Sadece yorum sahibinin silmesine izin ver
         if ($comment->author_id !== auth()->id()) {
             return response()->json(['error' => 'Bu yorumu silme yetkiniz yok.'], 403);
         }
@@ -64,5 +61,14 @@ class CommentController extends Controller
         $comment->delete();
 
         return response()->json(['message' => 'Yorum silindi.']);
+    }
+
+    private function resolveModel($type)
+    {
+        return match ($type) {
+            'blogs' => \App\Models\Blog::class,
+            'forum-topics' => \App\Models\ForumTopic::class,
+            default => abort(404, 'Model bulunamadı')
+        };
     }
 }
