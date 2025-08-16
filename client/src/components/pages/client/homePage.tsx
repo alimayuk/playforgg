@@ -1,6 +1,5 @@
 'use client'
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 import ImageSwiper from '@/components/ImageSwiper';
 import { CalendarDays, MessagesSquare } from 'lucide-react';
 import Title from '@/components/Title';
@@ -9,12 +8,21 @@ import { useEffect, useState } from 'react';
 import { Blog } from '@/customServices/blogs.service';
 import { Game } from '@/customServices/client.service';
 import { Category, FeaturedCategories } from '@/customServices/categories.service';
+import Link from 'next/link';
+import Cookies from 'js-cookie';
+import { EmptyLittle } from '@/components/EmptyLittle';
 
+interface Forums{
+    id: number;
+    title: string;
+    slug: string;
+}
 interface HomePageData {
     blogs: Blog[];
     games: Game[];
     categories: Category[];
     featuredCategories: FeaturedCategories[];
+    forums: Forums[];
     status: string;
 }
 
@@ -27,7 +35,7 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
     const t = useTranslations('HomePage');
     const [loading, setLoading] = useState(false); // Artık initialData ile başladığı için false
     const [error, setError] = useState<string | null>(null);
-
+    const locale = Cookies.get("NEXT_LOCALE") || "tr";
     // Trend forumlar için mock data
     const trends = data.categories.map(category => ({
         id: category.id,
@@ -48,7 +56,8 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                 <Title title1={"Öne Çıkan"} title2={'Kategoriler'} />
                 <div className="mt-6 md:mt-12 p-4 md:p-6 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {data.featuredCategories.map((featuredCategorie) => (
-                        <div
+                        <Link
+                            href={`${locale}/blogs?category=${featuredCategorie.slug}`}
                             key={featuredCategorie.id}
                             className="relative h-32 sm:h-40 flex items-center justify-center gap-4 rounded-lg p-4 shadow cursor-pointer overflow-hidden group"
                             style={{
@@ -65,8 +74,19 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                                     {/* <span className="text-sm sm:text-base md:text-lg text-orange-400">{featuredCategorie.subtitle}</span> */}
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
+                    {data.featuredCategories.length === 0 && (
+                        <EmptyLittle
+                            title="Öne çıkan bulunamadı"
+                            description={
+                                <>
+                                    Bu kategoride henüz bir öne çıkan eklenmemiş. <br />
+                                    Daha sonra tekrar kontrol etmeyi unutmayın!
+                                </>
+                            }
+                        />
+                    )}
                 </div>
             </div>
 
@@ -103,14 +123,25 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                                 </div>
                             </div>
                         ))}
+                        {data.blogs.length === 0 && (
+                            <EmptyLittle
+                                title="Blog bulunamadı"
+                                description={
+                                    <>
+                                        Bu kategoride henüz bir blog eklenmemiş. <br />
+                                        Daha sonra tekrar kontrol etmeyi unutmayın!
+                                    </>
+                                }
+                            />
+                        )}
                     </div>
 
                     {/* Sağ taraf - Yan içerik */}
                     <div className="lg:col-span-2 space-y-3 md:space-y-4">
                         <div className="py-3 px-3 md:py-4 md:pl-4 bg-gray-800 rounded-lg shadow">
-                            <div className="flex items-center gap-2 md:gap-4 mb-3 md:mb-4">
+                            <div className="flex items-center gap-2 md:gap-2 mb-3 md:mb-4">
                                 <h3 className="font-semibold text-lg md:text-xl text-orange-600 uppercase whitespace-nowrap">
-                                    Trend
+                                    Son
                                 </h3>
                                 <h3 className="font-semibold text-lg md:text-xl text-white uppercase whitespace-nowrap">
                                     Forumlar
@@ -118,13 +149,23 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                                 <div className="flex-grow h-px bg-white opacity-50"></div>
                             </div>
                             <ul className="space-y-1 text-white list-disc pl-4 md:pl-5 text-xs md:text-sm">
-                                {trends.map((trend) => (
+                                {data.forums.map((trend) => (
                                     <li key={trend.id}>
                                         <Link href={`/kategori/${trend.slug}`} className="hover:text-orange-400 transition">
                                             {trend.title}
                                         </Link>
                                     </li>
                                 ))}
+                                {trends.length === 0 && (
+                                    <EmptyLittle
+                                        title="Forumlar bulunamadı"
+                                        description={
+                                            <>
+                                                Hala bir forum oluşmadı.
+                                            </>
+                                        }
+                                    />
+                                )}
                             </ul>
                         </div>
 
@@ -144,7 +185,7 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                         </div>
 
                         <div className="py-3 px-3 md:py-4 md:pl-4 bg-gray-800 rounded-lg shadow">
-                            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                            <div className="flex items-center gap-2 md:gap-2 mb-3 md:mb-4">
                                 <h3 className="font-semibold text-lg md:text-xl text-orange-600 uppercase whitespace-nowrap">
                                     İçerik
                                 </h3>
@@ -161,6 +202,16 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                                         </Link>
                                     </li>
                                 ))}
+                                {data.categories.length === 0 && (
+                                    <EmptyLittle
+                                        title="Kategoriler bulunamadı"
+                                        description={
+                                            <>
+                                                Hala bir kategori oluşmadı.
+                                            </>
+                                        }
+                                    />
+                                )}
                             </ul>
                         </div>
                     </div>
@@ -181,6 +232,18 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                             slug: blog.slug
                         }} />
                     ))}
+
+                    {data.blogs.length === 0 && (
+                        <EmptyLittle
+                            title="Blog bulunamadı"
+                            description={
+                                <>
+                                    Bu kategoride henüz bir blog eklenmemiş. <br />
+                                    Daha sonra tekrar kontrol etmeyi unutmayın!
+                                </>
+                            }
+                        />
+                    )}
                 </div>
             </div>
 
@@ -211,8 +274,17 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                             </div>
                         </a>
                     ))}
+
                     {data.games.length === 0 && (
-                        <p className="text-gray-500 col-span-full text-center">Bu kategoride oyun bulunamadı.</p>
+                        <EmptyLittle
+                            title="Oyun bulunamadı"
+                            description={
+                                <>
+                                    Bu kategoride henüz bir oyun eklenmemiş. <br />
+                                    Daha sonra tekrar kontrol etmeyi unutmayın!
+                                </>
+                            }
+                        />
                     )}
                 </div>
             </div>

@@ -266,12 +266,19 @@ class ClientController extends Controller
         ]);
     }
 
-    public function forumsIndex()
+    public function forumsIndex(Request $request)
     {
+        $locale = $request->get('locale', 'tr');
         $forums = ForumTopic::with('user', 'category')->where('status', 1)->latest()->get();
+        $categories = Category::where('status', 1)
+            ->where('locale', $locale)
+            ->select(['id', 'title', 'slug'])
+            ->orderBy('title')
+            ->get();
         return response()->json([
-            'status' => 'success',
-            'data' => $forums
+            'data' => $forums,
+            'categories' => $categories,
+            'status' => 'success'
         ], 200);
     }
 
@@ -506,11 +513,17 @@ class ClientController extends Controller
             ->orderBy('title')
             ->take(9)
             ->get();
+        $forums = ForumTopic::where('status', 1)
+            ->select('id', 'title', 'slug')
+            ->orderBy('created_at', 'desc')
+            ->take(7)
+            ->get();
         return response()->json([
             'blogs' => $blogs,
             'games' => $games,
             'categories' => $categories,
             'featuredCategories' => $featuredCategories,
+            'forums' => $forums,
             'status' => 'success'
         ]);
     }

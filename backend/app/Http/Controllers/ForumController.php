@@ -11,7 +11,7 @@ class ForumController extends Controller
 {
     public function index()
     {
-        return ForumTopic::with('user','category')->latest()->get();
+        return ForumTopic::with('user', 'category')->latest()->get();
     }
 
     public function store(Request $request)
@@ -32,7 +32,22 @@ class ForumController extends Controller
             'status' => $data['status'] ?? true,
         ]);
 
-        return response()->json($topic, 201);
+        // Load relationships that are needed for the frontend
+        $topic->load(['user:id,username', 'category:id,title']);
+
+        return response()->json([
+            'id' => $topic->id,
+            'title' => $topic->title,
+            'content' => $topic->content,
+            'created_at' => $topic->created_at->toISOString(),
+            'user' => [
+                'username' => $topic->user->username
+            ],
+            'category' => $topic->category ? [
+                'id' => $topic->category->id,
+                'title' => $topic->category->title
+            ] : null
+        ], 201);
     }
 
     public function show(ForumTopic $topic)

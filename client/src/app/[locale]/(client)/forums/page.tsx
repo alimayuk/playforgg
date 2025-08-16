@@ -6,44 +6,90 @@ import { ForumService, ForumTopic } from "@/customServices/forms.service";
 
 const ForumPage = () => {
   const [posts, setPosts] = useState<ForumTopic[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    category_id: ""
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({
+    title: "",
+    content: "",
+    category_id: ""
+  });
 
-  // Forum konularını API'den yükle
+  // Fetch forum topics and categories
   useEffect(() => {
-    const fetchTopics = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const data = await ClientService.getAllTopicsClient();
-        setPosts(data?.data);
+        setPosts(data?.data || []);
+        setCategories(data?.categories || []);
       } catch (error) {
-        console.error("Forum konuları yüklenirken hata oluştu:", error);
+        console.error("Forum data loading error:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTopics();
+    fetchData();
   }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when user types
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      title: !formData.title.trim() ? "Başlık gereklidir" : "",
+      content: !formData.content.trim() ? "İçerik gereklidir" : "",
+      category_id: !formData.category_id ? "Kategori seçmelisiniz" : ""
+    };
+    
+    setFormErrors(errors);
+    return !errors.title && !errors.content && !errors.category_id;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    
+    if (!validateForm()) return;
 
     try {
       const createdTopic = await ForumService.createTopic({
-        title: newMessage.trim().slice(0, 255), // başlık olarak message kullanılıyor, istersen form geliştirilebilir
-        content: newMessage.trim(),
-        // category_id ve status eklenebilir
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        category_id: formData.category_id
       });
 
-      // Yeni oluşturulan konuyu listeye en başa ekle
+      // Add new topic to the beginning of the list
       setPosts([createdTopic, ...posts]);
-      setNewMessage("");
+      
+      // Reset form and close modal
+      setFormData({
+        title: "",
+        content: "",
+        category_id: ""
+      });
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Yeni gönderi oluşturulamadı:", error);
+      console.error("Failed to create topic:", error);
+      alert("Gönderi oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
 
@@ -60,7 +106,7 @@ const ForumPage = () => {
         </button>
       </div>
 
-      {/* Modal */}
+      {/* New Post Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl w-full max-w-2xl shadow-xl relative">
@@ -75,19 +121,84 @@ const ForumPage = () => {
               Yeni Gönderi Oluştur
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input type="text"  className="w-full p-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
-              <textarea
-                className="w-full p-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                rows={5}
-                maxLength={400}
-                placeholder="Başlık ve içerik (maks. 400 karakter)..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-              />
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {newMessage.length}/400
-                </span>
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Başlık*
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  maxLength={100}
+                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${
+                    formErrors.title ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  placeholder="Gönderi başlığı (maks. 100 karakter)"
+                />
+                {formErrors.title && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.title}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Kategori*
+                </label>
+                <select
+                  id="category_id"
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${
+                    formErrors.category_id ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                >
+                  <option value="">Kategori seçiniz</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.title}
+                    </option>
+                  ))}
+                </select>
+                {formErrors.category_id && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.category_id}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  İçerik*
+                </label>
+                <textarea
+                  id="content"
+                  name="content"
+                  value={formData.content}
+                  onChange={handleInputChange}
+                  rows={6}
+                  maxLength={2000}
+                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${
+                    formErrors.content ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  placeholder="Gönderi içeriğinizi yazın (maks. 2000 karakter)"
+                />
+                {formErrors.content && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.content}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-right">
+                  {formData.content.length}/2000
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  İptal
+                </button>
                 <button
                   type="submit"
                   className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition"
@@ -100,30 +211,46 @@ const ForumPage = () => {
         </div>
       )}
 
-      {/* Forum Postları */}
+      {/* Forum Posts */}
       <div className="space-y-4">
-        {loading && <p>Yükleniyor...</p>}
-        {!loading && posts.length === 0 && <p>Henüz gönderi yok.</p>}
-        {!loading &&
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <p className="text-lg">Henüz gönderi bulunmamaktadır.</p>
+            <p className="mt-2">İlk gönderiyi siz oluşturun!</p>
+          </div>
+        ) : (
           posts.map((post) => (
             <a
               key={post.id}
               href={`/forums/${post.id}`}
-              className="block bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-5 shadow-sm hover:shadow-md transition"
+              className="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-5 shadow-sm hover:shadow-md transition"
             >
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-gray-800 dark:text-white">
-                  @{post.user?.username || "Bilinmeyen"}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <span className="text-sm font-semibold text-orange-600">
+                    {post.category?.title || "Genel"}
+                  </span>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white mt-1">
+                    {post.title}
+                  </h3>
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {new Date(post.created_at).toLocaleDateString("tr-TR")}
                 </span>
               </div>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words line-clamp-4">
-                {post.title}
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words line-clamp-3">
+                {post.content}
               </p>
+              <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                <span>@{post.user?.username || "Bilinmeyen"}</span>
+              </div>
             </a>
-          ))}
+          ))
+        )}
       </div>
     </div>
   );

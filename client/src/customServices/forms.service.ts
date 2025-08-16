@@ -52,7 +52,6 @@ export const ForumService = {
 
     // Yeni konu oluştur
     createTopic: async (data: Partial<ForumTopic>): Promise<ForumTopic> => {
-        data.category_id = 212;
         return fetchWithAuth<ForumTopic>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/forums`,
             {

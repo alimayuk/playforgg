@@ -132,7 +132,8 @@ export const ClientService = {
     },
 
     getAllTopicsClient: async (): Promise<ForumTopic[]> => {
-        return fetchWithAuth<ForumTopic[]>(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/forums`);
+        const locale = getLocale();
+        return fetchWithAuth<ForumTopic[]>(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/forums?locale=${locale}`);
     },
 
     getTopicClient: async (id: number): Promise<ForumTopic> => {
