@@ -30,4 +30,11 @@ class ForumTopic extends Model
     {
         return $this->hasMany(ForumComment::class, 'topic_id')->whereNull('parent_id');
     }
+
+    public function scopeRecentPerUser($query, $userId, $limit = 3)
+    {
+        return $query->where('author_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit);
+    }
 }

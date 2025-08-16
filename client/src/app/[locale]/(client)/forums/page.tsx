@@ -3,8 +3,13 @@ import React, { useState, useEffect } from "react";
 import Title from "@/components/Title";
 import { ClientService } from "@/customServices/client.service";
 import { ForumService, ForumTopic } from "@/customServices/forms.service";
+import { useUserStore } from "@/stores/userStore";
+import { useSearchParams, useRouter } from 'next/navigation';
+import Empty from "@/components/Empty";
+import Loading from "@/components/Loading";
 
 const ForumPage = () => {
+  const { user, clearUser } = useUserStore();
   const [posts, setPosts] = useState<ForumTopic[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -20,14 +25,38 @@ const ForumPage = () => {
     category_id: ""
   });
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialPage = parseInt(searchParams.get('page') || '1');
+  const initialCategory = searchParams.get('category') || 'all';
+
+  const [pagination, setPagination] = useState({
+    current_page: initialPage,
+    last_page: 1,
+    per_page: 5,
+    total: 0
+  });
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+
   // Fetch forum topics and categories
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await ClientService.getAllTopicsClient();
+        const data = await ClientService.getAllTopicsClient({
+          page: currentPage,
+          category: selectedCategory !== 'all' ? selectedCategory : undefined
+        });
+
         setPosts(data?.data || []);
         setCategories(data?.categories || []);
+        setPagination({
+          current_page: data?.meta?.current_page || 1,
+          last_page: data?.meta?.last_page || 1,
+          per_page: data?.meta?.per_page || 5,
+          total: data?.meta?.total || 0
+        });
       } catch (error) {
         console.error("Forum data loading error:", error);
       } finally {
@@ -36,7 +65,16 @@ const ForumPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [currentPage, selectedCategory]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (currentPage > 1) params.set('page', currentPage.toString());
+    if (selectedCategory !== 'all') params.set('category', selectedCategory);
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  }, [currentPage, selectedCategory]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -44,8 +82,7 @@ const ForumPage = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Clear error when user types
+
     if (formErrors[name as keyof typeof formErrors]) {
       setFormErrors(prev => ({
         ...prev,
@@ -60,14 +97,14 @@ const ForumPage = () => {
       content: !formData.content.trim() ? "İçerik gereklidir" : "",
       category_id: !formData.category_id ? "Kategori seçmelisiniz" : ""
     };
-    
+
     setFormErrors(errors);
     return !errors.title && !errors.content && !errors.category_id;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     try {
@@ -77,10 +114,7 @@ const ForumPage = () => {
         category_id: formData.category_id
       });
 
-      // Add new topic to the beginning of the list
       setPosts([createdTopic, ...posts]);
-      
-      // Reset form and close modal
       setFormData({
         title: "",
         content: "",
@@ -89,21 +123,51 @@ const ForumPage = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to create topic:", error);
-      alert("Gönderi oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
+      alert(error.error);
     }
+  };
+
+  const changePage = (direction: 'prev' | 'next') => {
+    setCurrentPage(prev => {
+      if (direction === 'prev') return Math.max(prev - 1, 1);
+      if (direction === 'next') return Math.min(prev + 1, pagination.last_page);
+      return prev;
+    });
   };
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 py-12 space-y-8">
       <Title title1="Topluluk" title2="Forumları" />
 
-      <div className="flex justify-end">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition"
+      <div className="flex justify-between items-center">
+        <select
+          value={selectedCategory}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="bg-gray-800 text-white py-2 px-4 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
-          + Yeni Gönderi
-        </button>
+          <option value="all">Tüm Kategoriler</option>
+          {categories.map(category => (
+            <option key={category.id} value={category.slug}>
+              {category.title}
+            </option>
+          ))}
+        </select>
+
+        {user ? (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition"
+          >
+            + Yeni Gönderi
+          </button>
+        ) : (
+          <p className="text-gray-500">
+            Gönderi oluşturabilmek için giriş yapınız.
+          </p>
+        )}
       </div>
 
       {/* New Post Modal */}
@@ -132,9 +196,8 @@ const ForumPage = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   maxLength={100}
-                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${
-                    formErrors.title ? "border-red-500" : "border-gray-300 dark:border-gray-700"
-                  } focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${formErrors.title ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+                    } focus:outline-none focus:ring-2 focus:ring-orange-500`}
                   placeholder="Gönderi başlığı (maks. 100 karakter)"
                 />
                 {formErrors.title && (
@@ -151,9 +214,8 @@ const ForumPage = () => {
                   name="category_id"
                   value={formData.category_id}
                   onChange={handleInputChange}
-                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${
-                    formErrors.category_id ? "border-red-500" : "border-gray-300 dark:border-gray-700"
-                  } focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${formErrors.category_id ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+                    } focus:outline-none focus:ring-2 focus:ring-orange-500`}
                 >
                   <option value="">Kategori seçiniz</option>
                   {categories.map(category => (
@@ -178,9 +240,8 @@ const ForumPage = () => {
                   onChange={handleInputChange}
                   rows={6}
                   maxLength={2000}
-                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${
-                    formErrors.content ? "border-red-500" : "border-gray-300 dark:border-gray-700"
-                  } focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  className={`w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white border ${formErrors.content ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+                    } focus:outline-none focus:ring-2 focus:ring-orange-500`}
                   placeholder="Gönderi içeriğinizi yazın (maks. 2000 karakter)"
                 />
                 {formErrors.content && (
@@ -214,19 +275,17 @@ const ForumPage = () => {
       {/* Forum Posts */}
       <div className="space-y-4">
         {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-          </div>
+          <Loading />
         ) : posts.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            <p className="text-lg">Henüz gönderi bulunmamaktadır.</p>
-            <p className="mt-2">İlk gönderiyi siz oluşturun!</p>
-          </div>
+          <Empty
+            title="Gönderi bulunamadı"
+            description="Seçtiğiniz kriterlere uygun gönderi bulunamadı."
+          />
         ) : (
           posts.map((post) => (
             <a
               key={post.id}
-              href={`/forums/${post.id}`}
+              href={`/forums/${post.slug}`}
               className="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-5 shadow-sm hover:shadow-md transition"
             >
               <div className="flex justify-between items-start mb-2">
@@ -234,7 +293,8 @@ const ForumPage = () => {
                   <span className="text-sm font-semibold text-orange-600">
                     {post.category?.title || "Genel"}
                   </span>
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white mt-1">
+                  <h3 className="text-lg font-semibold text-gray-800 flex gap-2 dark:text-white mt-1">
+                    <span className="text-gray-600">@{post.user?.username || "Bilinmeyen"}</span>
                     {post.title}
                   </h3>
                 </div>
@@ -245,13 +305,33 @@ const ForumPage = () => {
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words line-clamp-3">
                 {post.content}
               </p>
-              <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <span>@{post.user?.username || "Bilinmeyen"}</span>
-              </div>
             </a>
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.last_page > 1 && (
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={() => changePage('prev')}
+            disabled={currentPage === 1}
+            className="px-4 py-2 rounded bg-gray-700 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed text-gray-300 hover:bg-gray-600 transition"
+          >
+            ← Önceki
+          </button>
+          <span className="text-sm text-gray-300">
+            Sayfa {currentPage} / {pagination.last_page}
+          </span>
+          <button
+            onClick={() => changePage('next')}
+            disabled={currentPage === pagination.last_page}
+            className="px-4 py-2 rounded bg-gray-700 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed text-gray-300 hover:bg-gray-600 transition"
+          >
+            Sonraki →
+          </button>
+        </div>
+      )}
     </div>
   );
 };

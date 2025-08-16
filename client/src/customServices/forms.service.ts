@@ -46,8 +46,13 @@ export interface ForumTopicDetail {
 
 export const ForumService = {
     // Tüm forum konularını listele
-    getAllTopics: async (): Promise<ForumTopic[]> => {
-        return fetchWithAuth<ForumTopic[]>(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums`);
+    getAllTopics: async (
+        page: number = 1,
+        per_page: number = 5
+    ): Promise<{ data: ForumTopic[]; meta?: any }> => {
+        return fetchWithAuth<{ data: ForumTopic[]; meta?: any }>(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/forums/`
+        );
     },
 
     // Yeni konu oluştur

@@ -269,23 +269,83 @@ class ClientController extends Controller
     public function forumsIndex(Request $request)
     {
         $locale = $request->get('locale', 'tr');
-        $forums = ForumTopic::with('user', 'category')->where('status', 1)->latest()->get();
+        $perPage = max(1, (int) $request->get('per_page', 5));
+        $categorySlug = $request->get('category', null);
+
+        $query = ForumTopic::query();
+        $query->select([
+            'id',
+            'author_id',
+            'category_id',
+            'title',
+            'slug',
+            'content',
+            'status',
+            'created_at',
+        ])
+            ->with([
+                'user:id,username',
+                'category:id,title,slug'
+            ])
+            ->orderBy('created_at', 'desc');
+
+        // Kategori filtresi ekle
+        if ($categorySlug && $categorySlug !== 'all') {
+            $query->whereHas('category', function ($q) use ($categorySlug) {
+                $q->where('slug', $categorySlug);
+            });
+        }
+
+        $forums = $query->paginate($perPage);
+
         $categories = Category::where('status', 1)
             ->where('locale', $locale)
             ->select(['id', 'title', 'slug'])
             ->orderBy('title')
             ->get();
+
         return response()->json([
-            'data' => $forums,
+            'data' => $forums->items(),
             'categories' => $categories,
-            'status' => 'success'
+            'status' => 'success',
+            'meta' => [
+                'current_page' => $forums->currentPage(),
+                'last_page' => $forums->lastPage(),
+                'per_page' => $forums->perPage(),
+                'total' => $forums->total(),
+            ]
         ], 200);
     }
 
-    public function forumsDetail(ForumTopic $topic)
+    public function forumsDetail($slug)
     {
-        $topic->increment('views');
-        return $topic->load(['user', 'comments.user', 'comments.replies.user']);
+        $form = ForumTopic::with([
+            'user:id,username',
+            'comments' => function ($query) {
+                $query->with(['user:id,username', 'replies.user:id,username'])
+                    ->whereNull('parent_id')
+                    ->orderBy('created_at', 'desc');
+            },
+            'category:id,title,slug'
+        ])
+            ->withCount(['comments'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // View sayacını artır (race condition önlemek için)
+        ForumTopic::where('id', $form->id)->increment('views');
+
+        return response()->json([
+            'data' => $form,
+            'related_topics' => ForumTopic::where('category_id', $form->category_id)
+                ->where('id', '!=', $form->id)
+                ->select('id', 'title', 'slug', 'created_at')
+                ->withCount('comments')
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get(),
+            'status' => 'success'
+        ]);
     }
 
     public function gamesIndex(Request $request)

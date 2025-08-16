@@ -252,7 +252,7 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                 <Title title1={"Oyun"} title2={'İçerikleri'} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {data.games.map((game) => (
-                        <a href={`/games/${game.id}`} key={game.id} className="group">
+                        <a href={`/games/${game.slug}`} key={game.id} className="group">
                             <div className="relative rounded-xl overflow-hidden cursor-pointer group shadow-lg isolate bg-gray-900 h-80 w-full md:h-96 transition-transform duration-500 hover:scale-105">
                                 <img
                                     src={`${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${game.image}`}

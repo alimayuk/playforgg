@@ -21,7 +21,6 @@ export const fetchWithAuth = async <T = any>(
     if (response.status === 401) {
         document.cookie = 'c=; Max-Age=0; path=/';
         document.cookie = 'token=; Max-Age=0; path=/';
-        window.location.href = '/login';
         throw new Error("Unauthorized");
     }
 

@@ -9,9 +9,31 @@ use Illuminate\Support\Str;
 
 class ForumController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return ForumTopic::with('user', 'category')->latest()->get();
+        $perPage = (int) $request->get('per_page', 5);
+        $query = ForumTopic::query();
+        $query->select([
+            'id',
+            'author_id',
+            'category_id',
+            'title',
+            'slug',
+            'content',
+            'status',
+            'created_at',
+        ])->orderBy('created_at', 'desc');
+        $forums = $query->paginate($perPage);
+        return response()->json([
+            'data' => $forums->items(),
+            'status' => 'success',
+            'meta' => [
+                'current_page' => $forums->currentPage(),
+                'last_page' => $forums->lastPage(),
+                'per_page' => $forums->perPage(),
+                'total' => $forums->total(),
+            ]
+        ]);
     }
 
     public function store(Request $request)
@@ -22,7 +44,9 @@ class ForumController extends Controller
             'category_id' => 'nullable|exists:categories,id',
             'status' => 'nullable|boolean'
         ]);
-
+        if (ForumTopic::recentPerUser(auth()->id())->count() >= 3) {
+            return response()->json(['error' => '1 saatte maksimum 3 gönderi yapabilirsiniz'], 429);
+        }
         $topic = ForumTopic::create([
             'author_id' => auth()->id(),
             'category_id' => $data['category_id'] ?? null,

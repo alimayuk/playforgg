@@ -40,7 +40,7 @@ class BlogController extends Controller
 
         return response()->json([
             'data' => $blogs->items(),
-            'status' => true,
+            'status' => 'success',
             'meta' => [
                 'current_page' => $blogs->currentPage(),
                 'last_page' => $blogs->lastPage(),

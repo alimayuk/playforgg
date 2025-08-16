@@ -26,7 +26,7 @@ Route::prefix('/client')->group(function () {
     Route::get('/blogs/{blog}/comments', [ClientController::class, 'commentsIndex']);
 
     Route::get('/forums', [ClientController::class, 'forumsIndex']);
-    Route::get('/forums/{topic}', [ClientController::class, 'forumsDetail']);
+    Route::get('/forums/{slug}', [ClientController::class, 'forumsDetail']);
 
     Route::get('/games', [ClientController::class, 'gamesIndex']);
     Route::get('/games/{slug}', [ClientController::class, 'gamesDetail']);
