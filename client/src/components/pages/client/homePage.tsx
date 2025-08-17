@@ -9,10 +9,10 @@ import { Blog } from '@/customServices/blogs.service';
 import { Game } from '@/customServices/client.service';
 import { Category, FeaturedCategories } from '@/customServices/categories.service';
 import Link from 'next/link';
-import Cookies from 'js-cookie';
 import { EmptyLittle } from '@/components/EmptyLittle';
+import { getLocale } from '@/utils/localeUtils';
 
-interface Forums{
+interface Forums {
     id: number;
     title: string;
     slug: string;
@@ -35,7 +35,7 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
     const t = useTranslations('HomePage');
     const [loading, setLoading] = useState(false); // Artık initialData ile başladığı için false
     const [error, setError] = useState<string | null>(null);
-    const locale = Cookies.get("NEXT_LOCALE") || "tr";
+    const locale = getLocale();
     // Trend forumlar için mock data
     const trends = data.categories.map(category => ({
         id: category.id,

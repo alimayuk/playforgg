@@ -16,8 +16,8 @@ export default async function LocaleLayout({
     }
 
     return (
-        <html lang={locale}>
-            <body>
+        <html>
+            <body suppressHydrationWarning>
                 {children}
             </body>
         </html>

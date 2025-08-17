@@ -30,6 +30,7 @@ import type { ColumnsType } from "antd/es/table";
 import { getCookie } from "cookies-next";
 import Dragger from "antd/es/upload/Dragger";
 import { GeneralService } from "@/customServices/general.service";
+import { getLocale } from "@/utils/localeUtils";
 
 const { Title } = Typography;
 
@@ -46,7 +47,7 @@ const normFile = (e: any) => {
   return e?.fileList;
 };
 const Categories: React.FC<Props> = ({ cats }) => {
-  const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
+  const locale = getLocale();
 
   const [form] = Form.useForm();
   const [categories, setCategories] = useState<Category[]>(cats?.data);

@@ -25,7 +25,9 @@ export interface Game {
     id: number;
     title: string;
     slug: string;
+    excerpt: string;
     image: string;
+    category: Category[];
     // diğer özellikler...
 }
 

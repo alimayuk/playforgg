@@ -7,5 +7,10 @@
     "locale": "Türkçe",
     "en": "İngilizce",
     "tr": "Türkçe"
+  },
+  "NotFound": {
+    "notfound": "Bulunamadı",
+    "backHome": "Ana sayfaya dön",
+    "description":"İstediğiniz sayfa bulunamadı."
   }
 }

@@ -1,10 +1,9 @@
-import { cookies } from 'next/headers';
+import { getLocale } from '@/utils/localeUtils';
 import BlogPage from '@/components/pages/client/blogs';
 
 const fetchBlogs = async () => {
-  const cookieStore = cookies();
-  const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
-  
+  const locale = getLocale();
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/blogs?locale=${locale}`, {
     headers: {
       Accept: 'application/json',

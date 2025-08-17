@@ -2,7 +2,6 @@ const createNextIntlPlugin = require("next-intl/plugin");
 
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@mdxeditor/editor"],
   reactStrictMode: true,
   webpack: (config) => {
     // this will override the experiments

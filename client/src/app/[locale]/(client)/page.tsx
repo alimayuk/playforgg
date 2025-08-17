@@ -1,10 +1,8 @@
+import { getLocale } from '@/utils/localeUtils';
 import HomePage from '@/components/pages/client/homePage';
-import { cookies } from 'next/headers';
 
 const fetchHomeData = async () => {
-    const cookieStore = cookies();
-    const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
-
+    const locale = getLocale();
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/home?locale=${locale}`, {
         headers: {
             Accept: 'application/json',

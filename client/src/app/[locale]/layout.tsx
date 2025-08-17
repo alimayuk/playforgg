@@ -21,16 +21,12 @@ export default async function LocaleLayout({
 
   const user = await getUser();
   return (
-    <html lang={locale}>
-      <body suppressHydrationWarning={true}>
-        <NextIntlClientProvider>
-          <AntdRegistry>
-            <UserHydration user={user} />
-            <AuthListener />
-            {children}
-          </AntdRegistry>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <>
+      <AntdRegistry>
+        <UserHydration user={user} />
+        <AuthListener />
+        {children}
+      </AntdRegistry>
+    </>
   );
 }
