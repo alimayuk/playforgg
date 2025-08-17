@@ -16,7 +16,7 @@ class ToggleController extends Controller
     protected $allowedFields = [
         'status',
         'featured',
-        // istersen başka boolean alanlar ekle
+        // başka boolean alanlar ekle
     ];
 
     public function toggleField(Request $request, $model, $id)

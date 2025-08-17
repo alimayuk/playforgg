@@ -23,7 +23,7 @@ Route::prefix('/client')->group(function () {
     Route::get('/articles', [ClientController::class, 'articles']);
     Route::get('/articles/{slug}', [ClientController::class, 'articleDetail']);
 
-     Route::get('{type}/{id}/comments', [ClientController::class, 'index']);
+     Route::get('{type}/{id}/comments', [ClientController::class, 'comments']);
 
     Route::get('/forums', [ClientController::class, 'forumsIndex']);
     Route::get('/forums/{slug}', [ClientController::class, 'forumsDetail']);
@@ -35,14 +35,6 @@ Route::prefix('/client')->group(function () {
 Route::middleware(['auth:api', 'global.throttle:60,1'])->group(function () {
     Route::put('/toggle-field/{model}/{id}', [ToggleController::class, 'toggleField']);
     Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
-
-    // Route::post('/blogs/{blog}/comments', [CommentController::class, 'store']);
-    // Route::put('/blogs/{blog}/comments/{comment}', [CommentController::class, 'update']);
-    // Route::delete('/blogs/{blog}/comments/{comment}', [CommentController::class, 'destroy']);
-
-    // Route::post('/forums/{topic}/comments', [ForumController::class, 'storeComment']);
-    // Route::delete('/forums/comments/{id}', [ForumController::class, 'destroyComment']);
-    // Route::put('/forums/comments/{id}', [ForumController::class, 'updateComment']);
 
     Route::prefix('{type}/{id}/comments')->group(function () {
         Route::get('/', [CommentController::class, 'index']);

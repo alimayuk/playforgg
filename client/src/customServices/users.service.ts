@@ -1,4 +1,4 @@
-import { getCookie } from "cookies-next";
+import { fetchApi } from "@/app/lib/fetchApi";
 
 interface User {
   id?: number;
@@ -19,56 +19,11 @@ interface AuthResponse {
   user?: User;
 }
 
-const fetchWithAuth = async <T = any>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> => {
-  const token = getCookie("token");
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-    ...options.headers,
-  };
-
-  try {
-    const response = await fetch(url, { ...options, headers, credentials: "include" });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
-};
-
-const fetchWithoutAuth = async <T = any>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> => {
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
-
-  try {
-    const response = await fetch(url, { ...options, headers, credentials: "include" });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
-};
 
 export const UsersService = {
 
   login: async (information: LoginCredentials): Promise<AuthResponse> => {
-    return fetchWithoutAuth<AuthResponse>(
+    return fetchApi<AuthResponse>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/login`,
       {
         method: "POST",
@@ -78,7 +33,7 @@ export const UsersService = {
   },
 
   register: async (values: User): Promise<AuthResponse> => {
-    return fetchWithoutAuth<AuthResponse>(
+    return fetchApi<AuthResponse>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/register`,
       {
         method: "POST",
@@ -87,21 +42,18 @@ export const UsersService = {
     );
   },
 
-  getUsers: async (token?: string): Promise<User[]> => {
-    return fetchWithAuth<User[]>(
+  getUsers: async (): Promise<User[]> => {
+    return fetchApi<User[]>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }, 
         cache: "no-store",
       }
     );
   },
 
   createUser: async (values: User): Promise<User> => {
-    return fetchWithAuth<User>(
+    return fetchApi<User>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users`,
       {
         method: "POST",
@@ -111,7 +63,7 @@ export const UsersService = {
   },
 
   updateUser: async (values: Partial<User>, id: number): Promise<User> => {
-    return fetchWithAuth<User>(
+    return fetchApi<User>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users/${id}`,
       {
         method: "PUT",
@@ -121,7 +73,7 @@ export const UsersService = {
   },
 
   deleteUser: async (id: number): Promise<{ message: string }> => {
-    return fetchWithAuth<{ message: string }>(
+    return fetchApi<{ message: string }>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/users/${id}`,
       {
         method: "DELETE",

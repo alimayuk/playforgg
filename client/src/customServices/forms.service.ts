@@ -1,4 +1,4 @@
-import { fetchWithAuth } from "@/app/lib/fetchWithAuth";
+import { fetchApi } from "@/app/lib/fetchApi";
 
 export interface ForumTopic {
     id: number;
@@ -45,19 +45,17 @@ export interface ForumTopicDetail {
 }
 
 export const ForumService = {
-    // Tüm forum konularını listele
     getAllTopics: async (
         page: number = 1,
         per_page: number = 5
     ): Promise<{ data: ForumTopic[]; meta?: any }> => {
-        return fetchWithAuth<{ data: ForumTopic[]; meta?: any }>(
+        return fetchApi<{ data: ForumTopic[]; meta?: any }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/forums/`
         );
     },
 
-    // Yeni konu oluştur
     createTopic: async (data: Partial<ForumTopic>): Promise<ForumTopic> => {
-        return fetchWithAuth<ForumTopic>(
+        return fetchApi<ForumTopic>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/forums`,
             {
                 method: "POST",
@@ -67,48 +65,20 @@ export const ForumService = {
         );
     },
 
-    // Tek bir konuyu getir
     getTopic: async (id: number): Promise<ForumTopic> => {
-        return fetchWithAuth<ForumTopic>(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${id}`);
+        return fetchApi<ForumTopic>(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${id}`);
     },
 
-    // Konuyu güncelle
     updateTopic: async (id: number, data: Partial<ForumTopic>): Promise<{ status: string, message: string, topic: ForumTopic }> => {
-        return fetchWithAuth(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${id}`, {
+        return fetchApi(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
     },
 
-    // Konuyu sil
     deleteTopic: async (id: number): Promise<{ status: string, message: string }> => {
-        return fetchWithAuth(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${id}`, {
-            method: "DELETE"
-        });
-    },
-
-    // Yorum ekle
-    addComment: async (topicId: number, data: Partial<ForumComment>): Promise<ForumComment> => {
-        return fetchWithAuth<ForumComment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${topicId}/comments`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-    },
-
-    // Yorum güncelle
-    updateComment: async (id: number, data: Partial<ForumComment>): Promise<{ status: string, message: string, comment: ForumComment }> => {
-        return fetchWithAuth(`${process.env.NEXT_PUBLIC_SERVER_URL}/comments/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-    },
-
-    // Yorum sil
-    deleteComment: async (id: number): Promise<{ status: string, message: string }> => {
-        return fetchWithAuth(`${process.env.NEXT_PUBLIC_SERVER_URL}/comments/${id}`, {
+        return fetchApi(`${process.env.NEXT_PUBLIC_SERVER_URL}/forums/${id}`, {
             method: "DELETE"
         });
     },

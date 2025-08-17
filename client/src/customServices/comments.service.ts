@@ -1,4 +1,4 @@
-import { fetchWithAuth } from "@/app/lib/fetchWithAuth";
+import { fetchApi } from "@/app/lib/fetchApi";
 
 export interface Comment {
     id: number;
@@ -16,28 +16,28 @@ export interface Comment {
 
 export const CommentsService = {
     addComment: (type: "blogs" | "forum-topics", id: number, text: string) =>
-        fetchWithAuth<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
+        fetchApi<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
         }),
 
     addReply: (type: "blogs" | "forum-topics", id: number, parentId: number, text: string) =>
-        fetchWithAuth<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
+        fetchApi<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text, parent_id: parentId })
         }),
 
     updateComment: (type: "blogs" | "forum-topics", id: number, commentId: number, text: string) =>
-        fetchWithAuth<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments/${commentId}`, {
+        fetchApi<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments/${commentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
         }),
 
     deleteComment: (type: "blogs" | "forum-topics", id: number, commentId: number) =>
-        fetchWithAuth<{ message: string }>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments/${commentId}`, {
+        fetchApi<{ message: string }>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments/${commentId}`, {
             method: "DELETE"
         })
 };

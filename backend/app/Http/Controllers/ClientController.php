@@ -492,7 +492,7 @@ class ClientController extends Controller
         ]);
     }
 
-    public function index($type, $id)
+    public function comments($type, $id)
     {
         $model = $this->resolveModel($type)::findOrFail($id);
 

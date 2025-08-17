@@ -168,7 +168,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
             cat.id === editingCategory.id ? { ...cat, ...updatedCategory.data } : cat
           )
         );
-        await fetchFilteredCategories(); // listeyi yenile
+        await fetchFilteredCategories();
         message.success("Kategori güncellendi.");
       } else {
         await CategoriesService.createCategory(formData);

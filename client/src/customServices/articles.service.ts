@@ -1,40 +1,8 @@
+import { fetchApi } from "@/app/lib/fetchApi";
 import { getCookie } from "cookies-next";
-
-interface FetchOptions extends RequestInit {
-    headers?: HeadersInit;
-}
 
 const getLocale = (): string => {
     return getCookie("NEXT_LOCALE")?.toString() || "tr";
-};
-
-const fetchWithAuth = async <T = any>(
-    url: string,
-    options: RequestInit = {}
-): Promise<T> => {
-
-    const headers = new Headers(options.headers);
-
-
-    if (options.body && !(options.body instanceof FormData)) {
-        headers.set("Content-Type", "application/json");
-    }
-
-    try {
-        const response = await fetch(url, {
-            ...options,
-            headers,
-            credentials: "include",
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw errorData;
-        }
-        return await response.json();
-    } catch (error) {
-        throw error;
-    }
 };
 
 export interface Article {
@@ -57,7 +25,7 @@ export const ArticlesService = {
         const queryLocale = locale && locale !== "hepsi" ? locale : "hepsi";
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/articles?locale=${queryLocale}&page=${page}&per_page=${per_page}`;
 
-        const data = await fetchWithAuth<{ data: Article[]; status: boolean; meta?: any }>(
+        const data = await fetchApi<{ data: Article[]; status: boolean; meta?: any }>(
             url,
             {
                 method: "GET",
@@ -72,7 +40,7 @@ export const ArticlesService = {
     getAllByLocale: async (locale: string): Promise<Article[]> => {
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/articles?locale=${locale}&per_page=9999`;
 
-        const data = await fetchWithAuth<{ data: Article[] }>(url, {
+        const data = await fetchApi<{ data: Article[] }>(url, {
             method: "GET",
             cache: "no-store",
             credentials: "include",
@@ -85,7 +53,7 @@ export const ArticlesService = {
 
         const isFormData = values instanceof FormData;
 
-        return fetchWithAuth<{ data: Article }>(
+        return fetchApi<{ data: Article }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/articles`,
             {
                 method: "POST",
@@ -100,7 +68,7 @@ export const ArticlesService = {
     ): Promise<{ data: Article }> => {
         const isFormData = values instanceof FormData;
 
-        return fetchWithAuth<{ data: Article }>(
+        return fetchApi<{ data: Article }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}`,
             {
                 method: "POST",
@@ -111,7 +79,7 @@ export const ArticlesService = {
 
     deleteArticle: async (id: number): Promise<{ message: string }> => {
         const locale = getLocale();
-        return fetchWithAuth<{ message: string }>(
+        return fetchApi<{ message: string }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}?locale=${locale}`,
             {
                 method: "DELETE",

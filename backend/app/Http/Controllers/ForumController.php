@@ -107,7 +107,6 @@ class ForumController extends Controller
         ]);
     }
 
-
     public function destroy($id)
     {
         $topic = ForumTopic::find($id);
@@ -127,62 +126,6 @@ class ForumController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Konu başarıyla silindi.'
-        ]);
-    }
-
-    public function storeComment(Request $request, ForumTopic $topic)
-    {
-        $data = $request->validate([
-            'message' => 'required|string|max:400',
-            'parent_id' => 'nullable|exists:forum_comments,id'
-        ]);
-
-        $comment = ForumComment::create([
-            'topic_id' => $topic->id,
-            'author_id' => auth()->id(),
-            'message' => $data['message'],
-            'parent_id' => $data['parent_id'] ?? null
-        ]);
-
-        return response()->json($comment->load('user', 'replies.user'), 201);
-    }
-
-    public function destroyComment($id)
-    {
-        $comment = ForumComment::findOrFail($id);
-
-        if ($comment->author_id !== auth()->id()) {
-            return response()->json(['error' => 'Bu yorumu silme yetkiniz yok.'], 403);
-        }
-
-        $comment->deleteWithReplies();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Yorum ve cevapları silindi.'
-        ]);
-    }
-
-    public function updateComment(Request $request, $id)
-    {
-        $comment = ForumComment::findOrFail($id);
-
-        if ($comment->author_id !== auth()->id()) {
-            return response()->json(['error' => 'Bu yorumu düzenleme yetkiniz yok.'], 403);
-        }
-
-        $data = $request->validate([
-            'message' => 'required|string|max:400'
-        ]);
-
-        $comment->update([
-            'message' => $data['message']
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Yorum güncellendi.',
-            'comment' => $comment->load('user', 'replies.user')
         ]);
     }
 }
