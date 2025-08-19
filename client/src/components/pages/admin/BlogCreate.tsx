@@ -11,8 +11,8 @@ import {
 } from '@mdxeditor/editor'
 import '@mdxeditor/editor/style.css'
 import { getCookie } from 'cookies-next'
-import { CategoriesService, Category } from '@/customServices/categories.service'
-import { BlogsService } from '@/customServices/blogs.service'
+import { CategoriesService, Category } from '@/services/categories.service'
+import { BlogsService } from '@/services/blogs.service'
 import SunEditor from 'suneditor-react'
 import plugins from 'suneditor/src/plugins';
 

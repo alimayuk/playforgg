@@ -1,23 +1,13 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
 import Title from '@/components/Title';
-import { Article } from '@/customServices/articles.service';
 import Cookies from 'js-cookie';
 import Loading from '@/components/Loading';
 import Empty from '@/components/Empty';
-
+import { Article, PaginatedResponse } from '@/types';
 
 interface Props {
-    initialData: {
-        data: Article[];
-        status: boolean;
-        meta: {
-            current_page: number;
-            last_page: number;
-            per_page: number;
-            total: number;
-        };
-    };
+    initialData: PaginatedResponse<Article>;
 }
 
 
@@ -83,7 +73,7 @@ const ArticlesPage: React.FC<Props> = ({ initialData }) => {
                                 <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{news.title}</h3>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{news.excerpt}</p>
                                 <span className="text-xs text-gray-400 mt-2 block">
-                                    {new Date(news.created_at).toLocaleDateString('tr-TR')}
+                                    {new Date(news?.created_at).toLocaleDateString('tr-TR')}
                                 </span>
                             </div>
                         </div>

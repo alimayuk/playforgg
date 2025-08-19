@@ -121,7 +121,7 @@ class ClientController extends Controller
                     'title' => $item->title,
                     'slug' => $item->slug,
                     'image' => $item->image,
-                    'date' => $item->created_at->format('d.m.Y'),
+                    'created_at' => $item->created_at->format('d.m.Y'),
                     'category' => [
                         'title' => $item->category->title ?? null,
                         'slug' => $item->category->slug ?? null,
@@ -138,8 +138,8 @@ class ClientController extends Controller
                 'content' => $blog->content,
                 'views' => $blog->views,
                 'comment_count' => $blog->comment_count,
-                'excerpt' => $blog->excerpt,
-                'date' => $blog->created_at->format('d.m.Y'),
+                'excerpt' => $blog->excerpt,    
+                'created_at' => $blog->created_at->format('d.m.Y'),
                 'category' => [
                     'title' => $blog->category->title ?? null,
                     'slug' => $blog->category->slug ?? null,

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Title from '@/components/Title';
 import Link from 'next/link';
-import { Blog } from '@/customServices/client.service';
+import { Blog } from '@/services/client.service';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import Empty from '@/components/Empty';

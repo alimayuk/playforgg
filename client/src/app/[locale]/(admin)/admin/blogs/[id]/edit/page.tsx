@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { message } from 'antd'
 import BlogForm from '@/components/BlogForm'
-import { BlogsService } from '@/customServices/blogs.service'
+import { BlogsService } from '@/services/blogs.service'
 import LoadingScreen from '@/components/LoadingScreen'
 
 const BlogEdit = () => {

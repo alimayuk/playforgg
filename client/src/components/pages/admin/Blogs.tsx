@@ -1,6 +1,6 @@
 'use client';
-import { Blog, BlogsService } from '@/customServices/blogs.service';
-import { GeneralService } from '@/customServices/general.service';
+import { Blog, BlogsService } from '@/services/blogs.service';
+import { GeneralService } from '@/services/general.service';
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Image, message, Popconfirm, Table, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';

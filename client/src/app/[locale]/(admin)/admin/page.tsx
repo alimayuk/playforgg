@@ -1,158 +1,175 @@
 'use client';
 
+import React, { useState, useMemo } from 'react';
+import { Card, DatePicker } from 'antd';
+import { Pie, Column, Line, Bar } from '@ant-design/charts';
 import { useUserStore } from '@/stores/userStore';
-import React from 'react'
-// import { useEffect, useState } from 'react';
-// import { Card, Input, Button, Table, Checkbox, Modal, message } from 'antd';
-// import type { ColumnsType } from 'antd/es/table';
-// import { PlusOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween'; // ✅ import plugin
+dayjs.extend(isBetween); // ✅ extend plugin
 
-// interface Role {
-//   id: number;
-//   name: string;
-//   permissions: { name: string }[];
-// }
+const { RangePicker } = DatePicker;
 
-// interface Permission {
-//   name: string;
-// }
+// 🔹 Fake uzun tarih verisi (1 yıl)
+const generateFakeDailyData = (days: number) => {
+  const data = [];
+  const start = dayjs().subtract(days, 'day');
+  for (let i = 0; i <= days; i++) {
+    data.push({
+      date: start.add(i, 'day').format('YYYY-MM-DD'),
+      users: Math.floor(Math.random() * 20) + 1,
+      blogs: Math.floor(Math.random() * 10) + 1,
+    });
+  }
+  return data;
+};
 
-// export default function RolesPage() {
-//   const [roles, setRoles] = useState<Role[]>([]);
-//   const [permissions, setPermissions] = useState<Permission[]>([]);
-//   const [newRoleName, setNewRoleName] = useState('');
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-//   const [checkedPermissions, setCheckedPermissions] = useState<string[]>([]);
+const dailyData = generateFakeDailyData(365);
 
-//   const token = 'BEARER_TOKEN_HERE'; // Replace with real auth
+const categories = [
+  { category: 'Technology', count: 14 },
+  { category: 'Gaming', count: 20 },
+  { category: 'Travel', count: 7 },
+  { category: 'Food', count: 5 },
+];
 
-//   const fetchRoles = async () => {
-//     const res = await fetch('/api/roles', {
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     const data = await res.json();
-//     setRoles(data);
-//   };
+const blogViews = [
+  { title: 'Next.js 14 Yeni Özellikler', views: 150 },
+  { title: 'Oyun Haberleri: GTA 6', views: 320 },
+  { title: 'En İyi Tatil Rotaları', views: 95 },
+  { title: 'React Server Components', views: 210 },
+];
 
-//   const fetchPermissions = async () => {
-//     const res = await fetch('/api/permissions', {
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     const data = await res.json();
-//     setPermissions(data);
-//   };
+const gameNews = [
+  { title: 'Cyberpunk 2077 Expansion', views: 180 },
+  { title: 'GTA 6 Çıkış Tarihi', views: 320 },
+  { title: 'Valorant Yeni Harita', views: 140 },
+];
 
-//   const handleCreateRole = async () => {
-//     if (!newRoleName) return;
-//     const res = await fetch('/api/roles', {
-//       method: 'POST',
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ name: newRoleName }),
-//     });
-//     if (res.ok) {
-//       message.success('Rol oluşturuldu');
-//       setNewRoleName('');
-//       fetchRoles();
-//     }
-//   };
-
-//   const openPermissionModal = (role: Role) => {
-//     setSelectedRole(role);
-//     setCheckedPermissions(role.permissions.map(p => p.name));
-//     setIsModalOpen(true);
-//   };
-
-//   const handlePermissionSave = async () => {
-//     if (!selectedRole) return;
-//     await fetch(`/api/roles/${selectedRole.id}/permissions`, {
-//       method: 'POST',
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ permissions: checkedPermissions }),
-//     });
-//     message.success('İzinler güncellendi');
-//     setIsModalOpen(false);
-//     fetchRoles();
-//   };
-
-//   useEffect(() => {
-//     fetchRoles();
-//     fetchPermissions();
-//   }, []);
-
-//   const columns: ColumnsType<Role> = [
-//     { title: 'Rol Adı', dataIndex: 'name' },
-//     {
-//       title: 'İzinler',
-//       render: (_, record) => record.permissions.map(p => p.name).join(', '),
-//     },
-//     {
-//       title: 'İşlem',
-//       render: (_, record) => (
-//         <Button onClick={() => openPermissionModal(record)}>İzinleri Düzenle</Button>
-//       ),
-//     },
-//   ];
-
-//   return (
-//     <div className="max-w-5xl mx-auto p-6 space-y-6">
-//       <Card title="Yeni Rol Oluştur" className="rounded-2xl shadow">
-//         <div className="flex gap-4 items-center">
-//           <Input
-//             value={newRoleName}
-//             onChange={e => setNewRoleName(e.target.value)}
-//             placeholder="Rol adı"
-//           />
-//           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreateRole}>
-//             Ekle
-//           </Button>
-//         </div>
-//       </Card>
-
-//       <Card title="Roller Listesi" className="rounded-2xl shadow">
-//         <Table columns={columns} dataSource={roles} rowKey="id" />
-//       </Card>
-
-//       <Modal
-//         title="İzinleri Güncelle"
-//         open={isModalOpen}
-//         onCancel={() => setIsModalOpen(false)}
-//         onOk={handlePermissionSave}
-//       >
-//         <div className="space-y-2">
-//           {permissions.map(p => (
-//             <Checkbox
-//               key={p.name}
-//               checked={checkedPermissions.includes(p.name)}
-//               onChange={e => {
-//                 const newChecked = e.target.checked
-//                   ? [...checkedPermissions, p.name]
-//                   : checkedPermissions.filter(item => item !== p.name);
-//                 setCheckedPermissions(newChecked);
-//               }}
-//             >
-//               {p.name}
-//             </Checkbox>
-//           ))}
-//         </div>
-//       </Modal>
-//     </div>
-//   );
-// }
-const page = () => {
+const Page = () => {
   const user = useUserStore((s) => s.user);
-  return (
-    <div>
-      <h1>Admin Panel</h1>
-      <p>Kullanıcı: {user?.username || 'Bulunamadı'}</p>
-    </div>
-  )
-}
 
-export default page
+  // Range filter state
+  const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+    dayjs().subtract(30, 'day'),
+    dayjs(),
+  ]);
+
+  const filteredData = useMemo(() => {
+    return dailyData.filter((d) =>
+      dayjs(d.date).isBetween(range[0], range[1], 'day', '[]')
+    );
+  }, [range]);
+
+  // Chart Configs
+  const userLineConfig = {
+    data: filteredData,
+    xField: 'date',
+    yField: 'users',
+    smooth: true,
+    color: '#1677ff',
+    xAxis: { label: { formatter: (text: string) => dayjs(text).format('MM-DD') } },
+  };
+
+  const blogLineConfig = {
+    data: filteredData,
+    xField: 'date',
+    yField: 'blogs',
+    smooth: true,
+    color: '#52c41a',
+    xAxis: { label: { formatter: (text: string) => dayjs(text).format('MM-DD') } },
+  };
+
+  const categoryPieConfig = {
+    data: categories,
+    angleField: 'count',
+    colorField: 'category',
+    radius: 0.9,
+    innerRadius: 0.6,
+    legend: { position: 'bottom' },
+    label: { text: 'count', position: 'outside' },
+  };
+
+  const viewsBarConfig = {
+    data: blogViews,
+    xField: 'views',
+    yField: 'title',
+    seriesField: 'title',
+    legend: false,
+    color: '#faad14',
+    barWidthRatio: 0.6,
+  };
+
+  const gameNewsConfig = {
+    data: gameNews,
+    xField: 'title',
+    yField: 'views',
+    color: '#eb2f96',
+    columnStyle: { radius: [5, 5, 0, 0] },
+  };
+
+  return (
+    <div className="p-6 space-y-8">
+      <h1 className="text-2xl font-bold mb-6">📊 Admin Dashboard</h1>
+      <p className="mb-4">Kullanıcı: {user?.username || 'Bulunamadı'}</p>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="rounded-2xl shadow">
+          <h2 className="text-lg font-semibold">Bugün Yeni Kullanıcı</h2>
+          <p className="text-2xl font-bold text-blue-600">20</p>
+        </Card>
+        <Card className="rounded-2xl shadow">
+          <h2 className="text-lg font-semibold">Bugün Paylaşılan Blog</h2>
+          <p className="text-2xl font-bold text-green-600">6</p>
+        </Card>
+        <Card className="rounded-2xl shadow">
+          <h2 className="text-lg font-semibold">Toplam Kategori</h2>
+          <p className="text-2xl font-bold text-purple-600">4</p>
+        </Card>
+      </div>
+
+      {/* Range Picker + Line Charts */}
+      <div className="flex flex-col md:flex-row gap-4 items-center">
+        <span>Tarih Aralığı:</span>
+        <RangePicker
+          value={range}
+          onChange={(dates) => {
+            if (dates && dates[0] && dates[1]) setRange([dates[0], dates[1]]);
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="rounded-2xl shadow">
+          <h2 className="mb-4 font-semibold">Günlük Yeni Kullanıcılar</h2>
+          <Line {...userLineConfig} />
+        </Card>
+        <Card className="rounded-2xl shadow">
+          <h2 className="mb-4 font-semibold">Günlük Blog Paylaşımları</h2>
+          <Line {...blogLineConfig} />
+        </Card>
+      </div>
+
+      {/* Categories Pie */}
+      <Card className="rounded-2xl shadow">
+        <h2 className="mb-4 font-semibold">Kategorilere Göre Bloglar</h2>
+        <Pie {...categoryPieConfig} />
+      </Card>
+
+      {/* Blog Views Ranking */}
+      <Card className="rounded-2xl shadow">
+        <h2 className="mb-4 font-semibold">En Çok Okunan Bloglar</h2>
+        <Bar {...viewsBarConfig} />
+      </Card>
+
+      {/* Game News */}
+      <Card className="rounded-2xl shadow">
+        <h2 className="mb-4 font-semibold">Oyun Haberleri</h2>
+        <Column {...gameNewsConfig} />
+      </Card>
+    </div>
+  );
+};
+
+export default Page;

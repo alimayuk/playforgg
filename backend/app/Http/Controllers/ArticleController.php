@@ -24,8 +24,8 @@ class ArticleController extends Controller
         $query->select([
             'id',
             'title',
-            'excerpt',
             'slug',
+            'excerpt',
             'status',
             'image',
             'locale',

@@ -1,6 +1,6 @@
 'use client'
-import { Game, GamesService } from '@/customServices/games.service';
-import { GeneralService } from '@/customServices/general.service';
+import { Game, GamesService } from '@/services/games.service';
+import { GeneralService } from '@/services/general.service';
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Image, message, Popconfirm, Table, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';

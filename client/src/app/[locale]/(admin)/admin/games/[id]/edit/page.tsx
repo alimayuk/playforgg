@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { message } from 'antd'
-import { BlogsService } from '@/customServices/blogs.service'
+import { BlogsService } from '@/services/blogs.service'
 import LoadingScreen from '@/components/LoadingScreen'
 import GameForm from '@/components/GameForm'
-import { GamesService } from '@/customServices/games.service'
+import { GamesService } from '@/services/games.service'
 
 const GameEdit = () => {
     const { id } = useParams() as { id: string }

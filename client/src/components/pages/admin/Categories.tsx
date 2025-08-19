@@ -25,11 +25,11 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { CategoriesService, Category } from "@/customServices/categories.service";
+import { CategoriesService, Category } from "@/services/categories.service";
 import type { ColumnsType } from "antd/es/table";
 import { getCookie } from "cookies-next";
 import Dragger from "antd/es/upload/Dragger";
-import { GeneralService } from "@/customServices/general.service";
+import { GeneralService } from "@/services/general.service";
 import { getLocale } from "@/utils/localeUtils";
 
 const { Title } = Typography;

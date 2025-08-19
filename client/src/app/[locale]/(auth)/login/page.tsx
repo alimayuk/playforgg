@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UsersService } from '@/customServices/users.service';
+import { UsersService } from '@/services/users.service';
 import { jwtTokenCreate } from '@/utils/jwtTokenCreate';
 
 const LoginPage = () => {

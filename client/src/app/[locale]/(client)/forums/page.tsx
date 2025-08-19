@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import Title from "@/components/Title";
-import { ClientService } from "@/customServices/client.service";
-import { ForumService, ForumTopic } from "@/customServices/forms.service";
+import { ClientService } from "@/services/client.service";
+import { ForumService, ForumTopic } from "@/services/forms.service";
 import { useUserStore } from "@/stores/userStore";
 import { useSearchParams, useRouter } from 'next/navigation';
 import Empty from "@/components/Empty";

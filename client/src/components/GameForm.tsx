@@ -11,7 +11,7 @@ import {
     headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
 } from '@mdxeditor/editor'
 import { getCookie } from 'cookies-next'
-import { CategoriesService, Category } from '@/customServices/categories.service'
+import { CategoriesService, Category } from '@/services/categories.service'
 import Dragger from 'antd/es/upload/Dragger'
 
 interface GameFormProps {

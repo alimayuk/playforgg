@@ -1,6 +1,6 @@
 'use client';
 import Title from '@/components/Title';
-import { Game } from '@/customServices/games.service';
+import { Game } from '@/services/games.service';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';

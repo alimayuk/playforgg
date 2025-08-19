@@ -1,6 +1,6 @@
 'use client';
 
-import { UsersService } from '@/customServices/users.service';
+import { UsersService } from '@/services/users.service';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Menu, X as CloseIcon, User } from 'lucide-react';

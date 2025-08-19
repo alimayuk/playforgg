@@ -6,7 +6,7 @@ import {
 } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { getCookie } from 'cookies-next'
-import { CategoriesService, Category } from '@/customServices/categories.service'
+import { CategoriesService, Category } from '@/services/categories.service'
 import Dragger from 'antd/es/upload/Dragger'
 import dynamic from 'next/dynamic'
 import 'suneditor/dist/css/suneditor.min.css'

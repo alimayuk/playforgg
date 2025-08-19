@@ -25,10 +25,10 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { ArticlesService, Article } from "@/customServices/articles.service";
+import { ArticlesService, Article } from "@/services/articles.service";
 import type { ColumnsType } from "antd/es/table";
 import { getCookie } from "cookies-next";
-import { GeneralService } from "@/customServices/general.service";
+import { GeneralService } from "@/services/general.service";
 
 const { Title } = Typography;
 

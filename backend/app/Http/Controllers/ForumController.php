@@ -44,9 +44,9 @@ class ForumController extends Controller
             'category_id' => 'nullable|exists:categories,id',
             'status' => 'nullable|boolean'
         ]);
-        if (ForumTopic::recentPerUser(auth()->id())->count() >= 3) {
-            return response()->json(['error' => '1 saatte maksimum 3 gönderi yapabilirsiniz'], 429);
-        }
+        // if (ForumTopic::recentPerUser(auth()->id())->count() >= 3) {
+        //     return response()->json(['error' => '1 saatte maksimum 3 gönderi yapabilirsiniz'], 429);
+        // }
         $topic = ForumTopic::create([
             'author_id' => auth()->id(),
             'category_id' => $data['category_id'] ?? null,

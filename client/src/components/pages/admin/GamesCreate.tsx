@@ -11,8 +11,8 @@ import {
     headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
 } from '@mdxeditor/editor'
 import { getCookie } from 'cookies-next'
-import { CategoriesService, Category } from '@/customServices/categories.service'
-import { GamesService } from '@/customServices/games.service'
+import { CategoriesService, Category } from '@/services/categories.service'
+import { GamesService } from '@/services/games.service'
 
 const GamesCreate = () => {
     const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
