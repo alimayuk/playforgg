@@ -1,101 +1,12 @@
-import { getCookie } from "cookies-next";
-import { ForumTopic } from "./forms.service";
 import { fetchApi } from "@/app/lib/fetchApi";
+import { Blog } from "@/types/blog";
+import { ForumTopicDetail, ForumTopicsParams, ForumTopicsResponse, HomePageData } from "@/types";
+import { getLocale } from "@/utils/localeUtils";
 
-const getLocale = (): string => {
-    return getCookie("NEXT_LOCALE")?.toString() || "tr";
-};
-
-export interface Blog {
-    id: number;
-    title: string;
-    slug: string;
-    locale: string;
-    [key: string]: any;
-}
-
-export interface HomePageData {
-    blogs: Blog[];
-    games: Game[];
-    categories: Category[];
-    status: string;
-}
-
-export interface Game {
-    id: number;
-    title: string;
-    slug: string;
-    excerpt: string;
-    image: string;
-    category: Category[];
-    // diğer özellikler...
-}
-
-export interface Category {
-    id: number;
-    title: string;
-    slug: string;
-}
-
-interface ForumTopicsResponse {
-    data: ForumTopic[];
-    categories?: any[];
-    meta?: {
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
-    status?: string;
-}
-
-interface ForumTopicsParams {
-    page?: number;
-    per_page?: number;
-    category?: string;
-    locale?: string;
-}
-interface ForumTopicDetail {
-    id: number;
-    title: string;
-    content: string;
-    slug: string;
-    views: number;
-    created_at: string;
-    comments_count: number;
-    likes_count: number;
-    user: {
-        id: number;
-        username: string;
-    };
-    category: {
-        id: number;
-        title: string;
-        slug: string;
-    };
-    comments: Array<{
-        id: number;
-        content: string;
-        created_at: string;
-        user: {
-            id: number;
-            username: string;
-        };
-        replies: Array<{
-            id: number;
-            content: string;
-            created_at: string;
-            user: {
-                id: number;
-                username: string;
-            };
-        }>;
-    }>;
-}
+const locale = getLocale();
 export const ClientService = {
 
     getHomePageData: async (): Promise<HomePageData> => {
-        const locale = getLocale();
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/client/home?locale=${locale}`;
 
         const response = await fetchApi<HomePageData>(url, { skipAuth: true });
@@ -145,7 +56,6 @@ export const ClientService = {
             page = 1,
             per_page = 5,
             category = '',
-            locale = getLocale()
         } = params;
 
         const queryParams = new URLSearchParams();
@@ -159,8 +69,10 @@ export const ClientService = {
         );
     },
 
-    getTopicClient: async (slug: string): Promise<ForumTopicDetail> => {
-        return fetchApi<ForumTopicDetail>(`${process.env.NEXT_PUBLIC_SERVER_URL}/client/forums/${slug}`);
+    getTopicClient: async (slug: string): Promise<{ data: ForumTopicDetail }> => {
+        return fetchApi<{ data: ForumTopicDetail }>(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/client/forums/${slug}`
+        );
     },
 
     getGames: async (

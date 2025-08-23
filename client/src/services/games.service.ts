@@ -1,17 +1,8 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-import { getCookie } from "cookies-next";
+import { Game } from "@/types";
+import { getLocale } from "@/utils/localeUtils";
 
-const getLocale = (): string => {
-    return getCookie("NEXT_LOCALE")?.toString() || "tr";
-};
-
-export interface Game {
-    id: number;
-    title: string;
-    slug: string;
-    locale: string;
-    [key: string]: any;
-}
+const locale = getLocale();
 
 export const GamesService = {
     getGames: async (
@@ -53,7 +44,6 @@ export const GamesService = {
         });
     },
     deleteGame: async (id: number): Promise<{ message: string }> => {
-        const locale = getLocale();
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/games/${id}?locale=${locale}`;
         const response = await fetchApi(url, {
             method: "DELETE",

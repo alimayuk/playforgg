@@ -1,24 +1,5 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-
-interface User {
-  id?: number;
-  username: string;
-  email: string;
-  password?: string;
-  password_confirmation?: string;
-}
-
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
-interface AuthResponse {
-  status: string;
-  token: string;
-  user?: User;
-}
-
+import { AuthResponse, LoginCredentials, User } from "@/types";
 
 export const UsersService = {
 

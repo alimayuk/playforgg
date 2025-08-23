@@ -1,10 +1,11 @@
 'use client';
-import { Blog, BlogsService } from '@/services/blogs.service';
+import { BlogsService } from '@/services/blogs.service';
 import { GeneralService } from '@/services/general.service';
+import { Blog, PaginationMeta } from '@/types';
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Image, message, Popconfirm, Table, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const fetchBlogs = async (page: number, perPage: number, locale: string): Promise<{
     data: Blog[];
@@ -25,11 +26,7 @@ const fetchBlogs = async (page: number, perPage: number, locale: string): Promis
 
 interface Props {
     initialData: Blog[];
-    initialMeta: {
-        current_page: number;
-        per_page: number;
-        total: number;
-    };
+    initialMeta: PaginationMeta;
     locale: string;
 }
 

@@ -11,7 +11,7 @@ export interface Category extends BaseEntity {
     locale: string;
 }
 
-// export interface FeaturedCategory extends Category {
-//     icon: string;
-//     image: string;
-// }
+export interface FeaturedCategory extends Category {
+    icon: string;
+    image: string;
+}

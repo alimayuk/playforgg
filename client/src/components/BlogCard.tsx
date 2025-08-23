@@ -1,14 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
+import { BlogPost } from '@/types';
 
-export interface BlogPost {
-  id: string | number;
-  author: string;
-  slug: string;
-  title: string;
-  image: string;
-  date: string;
-}
 
 interface BlogCardProps {
   post: BlogPost;
@@ -42,8 +35,8 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
           className="flex items-center justify-between mt-1 opacity-0 max-h-0 overflow-hidden transition-all duration-500 group-hover:opacity-100 group-hover:max-h-10"
           style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
         >
-          <time className="text-gray-300 text-sm select-none" dateTime={post.date}>
-            {post.date}
+          <time className="text-gray-300 text-sm select-none" dateTime={post.created_at}>
+            {post.created_at}
           </time>
           <Link
             href={`/blogs/${post.slug}`}

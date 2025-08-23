@@ -5,3 +5,8 @@ export * from "./article";
 export * from "./category";
 export * from "./blog";
 export * from "./comment";
+export * from "./game";
+export * from "./forumTopic";
+export * from "./user";
+export * from './auth';
+export * from './general';

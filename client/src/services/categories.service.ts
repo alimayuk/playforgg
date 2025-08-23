@@ -1,26 +1,9 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-import { getCookie } from "cookies-next";
+import { Category } from "@/types";
+import { getLocale } from "@/utils/localeUtils";
 
-const getLocale = (): string => {
-    return getCookie("NEXT_LOCALE")?.toString() || "tr";
-};
+const locale = getLocale();
 
-export interface Category {
-    id: number;
-    title: string;
-    slug: string;
-    locale: string;
-    [key: string]: any;
-}
-export interface FeaturedCategories {
-    id: number;
-    title: string;
-    slug: string;
-    icon: string;
-    image: string;
-    locale: string;
-    [key: string]: any;
-}
 export const CategoriesService = {
 
     getCategories: async (
@@ -89,7 +72,6 @@ export const CategoriesService = {
     },
 
     deleteCategory: async (id: number): Promise<{ message: string }> => {
-        const locale = getLocale();
         return fetchApi<{ message: string }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/categories/${id}?locale=${locale}`,
             {

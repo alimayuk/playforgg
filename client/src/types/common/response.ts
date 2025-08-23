@@ -1,11 +1,9 @@
 import { PaginationMeta } from "./pagination";
-import { Blog, OtherBlog, Category } from "../index";
+import { OtherBlog, Category, OtherGame, BlogType, GameType, ForumTopic, ForumTopicUpper } from "../index";
+import { ClientUser } from "../user";
 
-type SubCategory = Pick<Category, 'title' | 'slug'>;
+export type SubCategory = Pick<Category, 'id' | 'title' | 'slug'>;
 
-export type BlogType = Omit<Blog, 'category_id' | 'slug' | 'status' | 'locale' | 'excerpt' | 'comment_count' | 'views'> & {
-    category: SubCategory;
-};
 
 export interface ApiResponse<T> {
     data: T;
@@ -26,4 +24,42 @@ export type OtherBlogWithCategory = OtherBlog & {
 export interface BlogDetailResponse {
     data: BlogType;
     otherBlogs: OtherBlogWithCategory[];
+};
+
+export interface BlogListResponse {
+    data: BlogType[];
+    categories: SubCategory[];
+    status: string;
+    meta: PaginationMeta;
 }
+
+export type OtherGameWithCategory = OtherGame & {
+    category: SubCategory;
+};
+
+export interface GameDetailResponse {
+    data: GameType;
+    otherGames: OtherGameWithCategory[];
+};
+
+export type GameListResponse = {
+    data: GameType[];
+    categories: SubCategory[];
+    status: string;
+    meta: PaginationMeta;
+};
+
+export interface ForumListResponse {
+    data: ForumTopicUpper[];
+    user: ClientUser;
+    category: SubCategory;
+    status: string;
+    meta: PaginationMeta;
+}
+
+export type ForumTopicsResponse = {
+    data: ForumTopic[];
+    meta: PaginationMeta;
+    status: string;
+    categories: SubCategory[];
+};

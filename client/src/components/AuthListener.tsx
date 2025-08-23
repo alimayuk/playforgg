@@ -21,8 +21,6 @@ export default function AuthListener() {
         }
       }
     };
-
-    // MutationObserver ile DOM değişikliklerini izle
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'x-clear-auth') {
@@ -36,14 +34,11 @@ export default function AuthListener() {
       attributeFilter: ['x-clear-auth'],
     });
 
-    // İlk yüklemede kontrol et
     checkAuth();
 
-    // Her route değişikliğinde kontrol et
     const handleRouteChange = () => checkAuth();
     window.addEventListener('routeChangeComplete', handleRouteChange);
 
-    // Pencere focus olduğunda kontrol et
     window.addEventListener('focus', checkAuth);
 
     return () => {

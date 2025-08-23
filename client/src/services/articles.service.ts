@@ -1,21 +1,10 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-import { getCookie } from "cookies-next";
+import { Article } from "@/types";
+import { getLocale } from "@/utils/localeUtils";
 
-const getLocale = (): string => {
-    return getCookie("NEXT_LOCALE")?.toString() || "tr";
-};
-
-export interface Article {
-    id: number;
-    title: string;
-    slug: string;
-    locale: string;
-    excerpt: string;
-    [key: string]: any;
-}
+const locale = getLocale();
 
 export const ArticlesService = {
-
     getArticles: async (
         locale: string = "tr",
         page: number = 1,
@@ -78,7 +67,6 @@ export const ArticlesService = {
     },
 
     deleteArticle: async (id: number): Promise<{ message: string }> => {
-        const locale = getLocale();
         return fetchApi<{ message: string }>(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}?locale=${locale}`,
             {

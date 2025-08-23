@@ -1,4 +1,4 @@
-import {hasLocale } from 'next-intl';
+import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import '../../globals.css';
@@ -16,10 +16,8 @@ export default async function LocaleLayout({
     }
 
     return (
-        <html>
-            <body suppressHydrationWarning>
-                {children}
-            </body>
-        </html>
+        <main>
+            {children}
+        </main>
     );
 }

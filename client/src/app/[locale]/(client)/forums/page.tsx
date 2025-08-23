@@ -2,15 +2,18 @@
 import React, { useState, useEffect } from "react";
 import Title from "@/components/Title";
 import { ClientService } from "@/services/client.service";
-import { ForumService, ForumTopic } from "@/services/forms.service";
+import { ForumService } from "@/services/forms.service";
 import { useUserStore } from "@/stores/userStore";
 import { useSearchParams, useRouter } from 'next/navigation';
 import Empty from "@/components/Empty";
 import Loading from "@/components/Loading";
-
-const ForumPage = () => {
+import { ForumListResponse } from "@/types";
+interface Props {
+    initialData: ForumListResponse;
+}
+const ForumPage: React.FC<Props> = () => {
   const { user, clearUser } = useUserStore();
-  const [posts, setPosts] = useState<ForumTopic[]>([]);
+  const [posts, setPosts] = useState<Props['initialData']['data']>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: "",

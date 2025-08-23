@@ -5,19 +5,14 @@ import {
     Form, Input, Select, Upload, Switch, Button, message,
 } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
-import {
-    MDXEditor, linkDialogPlugin,
-    headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
-} from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
-import { getCookie } from 'cookies-next'
 import { CategoriesService, Category } from '@/services/categories.service'
 import { BlogsService } from '@/services/blogs.service'
 import SunEditor from 'suneditor-react'
 import plugins from 'suneditor/src/plugins';
+import { getLocale } from '@/utils/localeUtils'
 
 const BlogCreate = () => {
-    const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
+    const locale = getLocale();
 
     const [content, setContent] = useState('')
     const [editorKey, setEditorKey] = useState(0);
@@ -120,8 +115,8 @@ const BlogCreate = () => {
                     <div className="border border-gray-300 rounded overflow-hidden prose max-w-none">
                         <SunEditor
                             setContents={content}
-                            defaultValue={content}      // initial content burada verilir
-                            onChange={setContent}        // değişiklikleri yakala
+                            defaultValue={content}
+                            onChange={setContent}
                             height="400px"
                             setOptions={{
                                 buttonList: [

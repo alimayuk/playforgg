@@ -29,7 +29,6 @@ class ClientController extends Controller
                 'title',
                 'slug',
                 'image',
-                'content',
                 'status',
                 'views',
                 'comment_count',
@@ -138,7 +137,7 @@ class ClientController extends Controller
                 'content' => $blog->content,
                 'views' => $blog->views,
                 'comment_count' => $blog->comment_count,
-                'excerpt' => $blog->excerpt,    
+                'excerpt' => $blog->excerpt,
                 'created_at' => $blog->created_at->format('d.m.Y'),
                 'category' => [
                     'title' => $blog->category->title ?? null,
@@ -237,7 +236,7 @@ class ClientController extends Controller
                     'title' => $item->title,
                     'slug' => $item->slug,
                     'image' => $item->image,
-                    'date' => $item->created_at->format('d.m.Y'),
+                    'created_at' => $item->created_at->format('d.m.Y'),
                     'category' => [
                         'title' => $item->category->title ?? null,
                         'slug' => $item->category->slug ?? null,
@@ -255,7 +254,7 @@ class ClientController extends Controller
                 'views' => $article->views,
                 'comment_count' => $article->comment_count,
                 'excerpt' => $article->excerpt,
-                'date' => $article->created_at->format('d.m.Y'),
+                'created_at' => $article->created_at->format('d.m.Y'),
                 'category' => [
                     'title' => $article->category->title ?? null,
                     'slug' => $article->category->slug ?? null,
@@ -321,11 +320,6 @@ class ClientController extends Controller
     {
         $form = ForumTopic::with([
             'user:id,username',
-            'comments' => function ($query) {
-                $query->with(['user:id,username', 'replies.user:id,username'])
-                    ->whereNull('parent_id')
-                    ->orderBy('created_at', 'desc');
-            },
             'category:id,title,slug'
         ])
             ->withCount(['comments'])
@@ -337,13 +331,6 @@ class ClientController extends Controller
 
         return response()->json([
             'data' => $form,
-            'related_topics' => ForumTopic::where('category_id', $form->category_id)
-                ->where('id', '!=', $form->id)
-                ->select('id', 'title', 'slug', 'created_at')
-                ->withCount('comments')
-                ->orderBy('created_at', 'desc')
-                ->limit(5)
-                ->get(),
             'status' => 'success'
         ]);
     }
@@ -455,7 +442,7 @@ class ClientController extends Controller
                     'title' => $item->title,
                     'slug' => $item->slug,
                     'image' => $item->image,
-                    'date' => $item->created_at->format('d.m.Y'),
+                    'created_at' => $item->created_at->format('d.m.Y'),
                     'category' => [
                         'id' => $item->category->id ?? null,
                         'title' => $item->category->title ?? null,
@@ -476,7 +463,7 @@ class ClientController extends Controller
                 'image' => $game->image,
                 'content' => $game->content,
                 'views' => $game->views,
-                'date' => $game->created_at->format('d.m.Y'),
+                'created_at' => $game->created_at->format('d.m.Y'),
                 'category' => [
                     'id' => $game->category->id ?? null,
                     'title' => $game->category->title ?? null,
@@ -497,9 +484,30 @@ class ClientController extends Controller
         $model = $this->resolveModel($type)::findOrFail($id);
 
         $comments = $model->comments()
-            ->with(['user', 'replies.user'])
+            ->with([
+                'user:id,username',
+                'replies:id,author_id,parent_id,text,created_at',
+                'replies.user:id,username'
+            ])
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'author_id' => $comment->author_id,
+                    'text' => $comment->text,
+                    'created_at' => $comment->created_at,
+                    'user' => $comment->user,
+                    'replies' => $comment->replies->map(fn($r) => [
+                        'id' => $r->id,
+                        'author_id' => $r->author_id,
+                        'parent_id' => $r->parent_id,
+                        'text' => $r->text,
+                        'created_at' => $r->created_at,
+                        'user' => $r->user,
+                    ]),
+                ];
+            });
 
         return response()->json($comments);
     }

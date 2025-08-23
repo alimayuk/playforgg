@@ -3,30 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Title from '@/components/Title';
 import Link from 'next/link';
-import { Blog } from '@/services/client.service';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import Empty from '@/components/Empty';
 import Loading from '@/components/Loading';
-
-interface Category {
-    id: number;
-    title: string;
-    slug: string;
-}
+import { getLocale } from '@/utils/localeUtils';
+import { BlogListResponse } from '@/types';
 
 interface Props {
-    initialData: {
-        data: Blog[];
-        categories: Category[];
-        status: boolean;
-        meta: {
-            current_page: number;
-            last_page: number;
-            per_page: number;
-            total: number;
-        };
-    };
+    initialData: BlogListResponse;
 }
 
 const BlogPage: React.FC<Props> = ({ initialData }) => {
@@ -46,7 +30,7 @@ const BlogPage: React.FC<Props> = ({ initialData }) => {
     useEffect(() => {
         const fetchFiltered = async () => {
             setLoading(true); // yükleniyor başlasın
-            const locale = Cookies.get("NEXT_LOCALE") || "tr";
+            const locale = getLocale();
             try {
                 const res = await fetch(
                     `${process.env.NEXT_PUBLIC_SERVER_URL}/client/blogs?locale=${locale}&category=${selectedCategory}&perPage=9&page=${currentPage}`,
@@ -68,7 +52,7 @@ const BlogPage: React.FC<Props> = ({ initialData }) => {
 
         fetchFiltered();
     }, [selectedCategory, currentPage]);
-    
+
     useEffect(() => {
         const params = new URLSearchParams();
         if (selectedCategory !== 'tum') params.set('category', selectedCategory);

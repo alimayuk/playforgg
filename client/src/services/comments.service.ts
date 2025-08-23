@@ -1,36 +1,23 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-
-export interface Comment {
-    id: number;
-    author_id: number;
-    text: string;
-    parent_id: number | null;
-    replies?: Comment[];
-    user: {
-        id: number;
-        username: string;
-        email?: string;
-    };
-    [key: string]: any;
-}
+import { CommentType } from "@/types";
 
 export const CommentsService = {
     addComment: (type: "blogs" | "forum-topics", id: number, text: string) =>
-        fetchApi<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
+        fetchApi<CommentType>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
         }),
 
     addReply: (type: "blogs" | "forum-topics", id: number, parentId: number, text: string) =>
-        fetchApi<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
+        fetchApi<CommentType>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text, parent_id: parentId })
         }),
 
     updateComment: (type: "blogs" | "forum-topics", id: number, commentId: number, text: string) =>
-        fetchApi<Comment>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments/${commentId}`, {
+        fetchApi<CommentType>(`${process.env.NEXT_PUBLIC_SERVER_URL}/${type}/${id}/comments/${commentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })

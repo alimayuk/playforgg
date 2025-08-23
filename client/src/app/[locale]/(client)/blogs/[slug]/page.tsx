@@ -1,5 +1,5 @@
 import BlogDetailPage from '@/components/pages/client/blogDetail';
-import { cookies } from 'next/headers';
+import { getLocale } from '@/utils/localeUtils';
 import { notFound } from 'next/navigation';
 
 const fetchBlog = async (slug: string, locale: string) => {
@@ -11,23 +11,22 @@ const fetchBlog = async (slug: string, locale: string) => {
     });
 
     if (!res.ok) {
-        return null; // veya throw new Error('Blog alınamadı');
+        return null;
     }
 
     return res.json();
 };
 
 const Page = async ({ params }: { params: { slug: string } }) => {
-    const cookieStore = cookies();
-    const locale = cookieStore.get('NEXT_LOCALE')?.value || 'tr';
+    const locale = getLocale();
     const { slug } = params;
 
     const blog = await fetchBlog(slug, locale);
-    
+
     if (!blog) {
         notFound();
     }
-    
+
     return <BlogDetailPage initialData={blog} />
 };
 

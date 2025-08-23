@@ -1,6 +1,5 @@
-// components/CommentsSection.tsx
 'use client';
-import { useState, useEffect } from 'react'; // useEffect ekledik
+import { useState, useEffect } from 'react';
 import { CommentsService } from '@/services/comments.service';
 import Link from 'next/link';
 import { useUserStore } from '@/stores/userStore';
@@ -8,12 +7,13 @@ import { timeAgo } from '@/utils/time';
 import { Comment } from '@/types';
 
 interface CommentsSectionProps {
-    type: 'blogs' | 'forum-topics' | string;
+    type: 'blogs' | 'forum-topics';
     contentId: number;
+    initialComments?: Comment[];
 }
 
-export default function CommentsSection({ type, contentId }: CommentsSectionProps) {
-    const [comments, setComments] = useState<Comment[]>([]);
+export default function CommentsSection({ type, contentId, initialComments }: CommentsSectionProps) {
+    const [comments, setComments] = useState<Comment[]>(initialComments || []);
     const [commentText, setCommentText] = useState('');
     const [replyText, setReplyText] = useState('');
     const [activeReply, setActiveReply] = useState<number | null>(null);
@@ -25,7 +25,6 @@ export default function CommentsSection({ type, contentId }: CommentsSectionProp
     const [editingReply, setEditingReply] = useState<number | null>(null);
     const [editReplyText, setEditReplyText] = useState("");
 
-    // Yorumları çekme
     useEffect(() => {
         const fetchComments = async () => {
             try {
@@ -47,7 +46,6 @@ export default function CommentsSection({ type, contentId }: CommentsSectionProp
         }
     }, [type, contentId]);
 
-    // Comment ekleme
     const handleAddComment = async () => {
         if (!commentText.trim()) return;
         setLoading(true);
@@ -62,7 +60,6 @@ export default function CommentsSection({ type, contentId }: CommentsSectionProp
         }
     };
 
-    // Reply ekleme
     const handleAddReply = async (commentId: number) => {
         if (!replyText.trim()) return;
         setLoading(true);
@@ -84,19 +81,16 @@ export default function CommentsSection({ type, contentId }: CommentsSectionProp
         }
     };
 
-    // Comment veya Reply güncelleme
     const handleUpdateCommentOrReply = async (commentId: number, parentId: number | null, text: string) => {
         if (!text.trim()) return;
         try {
             const updated = await CommentsService.updateComment(type, contentId, commentId, text);
             if (parentId === null) {
-                // Comment güncelleme
                 setComments(prev =>
                     prev.map(c => (c.id === commentId ? { ...c, text: updated.text } : c))
                 );
                 setEditingComment(null);
             } else {
-                // Reply güncelleme
                 setComments(prev =>
                     prev.map(c =>
                         c.id === parentId
@@ -114,7 +108,6 @@ export default function CommentsSection({ type, contentId }: CommentsSectionProp
         }
     };
 
-    // Comment veya Reply silme
     const handleDeleteCommentOrReply = async (commentId: number, parentId: number | null) => {
         if (!confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
         try {

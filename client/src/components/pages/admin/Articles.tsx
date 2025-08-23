@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -23,12 +22,13 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
-  UploadOutlined,
 } from "@ant-design/icons";
-import { ArticlesService, Article } from "@/services/articles.service";
+import { ArticlesService } from "@/services/articles.service";
 import type { ColumnsType } from "antd/es/table";
 import { getCookie } from "cookies-next";
 import { GeneralService } from "@/services/general.service";
+import { Article } from "@/types";
+import { getLocale } from "@/utils/localeUtils";
 
 const { Title } = Typography;
 
@@ -47,8 +47,7 @@ const normFile = (e: any) => {
 };
 
 const Articles: React.FC<Props> = ({ initialData }) => {
-  const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
-
+  const locale = getLocale();
   const [form] = Form.useForm();
   const [articles, setArticles] = useState<Article[]>(initialData?.data);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -63,7 +62,6 @@ const Articles: React.FC<Props> = ({ initialData }) => {
   const [imageRemoved, setImageRemoved] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
 
-  // Upload dosya listesi değiştiğinde Form'a set et
   const onUploadChange = ({ fileList: newFileList }: { fileList: any[] }) => {
     setFileList(newFileList);
     form.setFieldsValue({ image: newFileList });
@@ -127,11 +125,8 @@ const Articles: React.FC<Props> = ({ initialData }) => {
       let fileObj = null;
 
       if (values.image && values.image[0]) {
-        // Öncelik originFileObj
         fileObj = values.image[0].originFileObj || values.image[0];
       }
-
-      console.log("Image file object last:", fileObj instanceof File ? fileObj : null);
 
       const formData = new FormData();
 

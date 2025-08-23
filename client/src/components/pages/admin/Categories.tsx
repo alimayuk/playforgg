@@ -25,12 +25,13 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { CategoriesService, Category } from "@/services/categories.service";
+import { CategoriesService } from "@/services/categories.service";
 import type { ColumnsType } from "antd/es/table";
 import { getCookie } from "cookies-next";
 import Dragger from "antd/es/upload/Dragger";
 import { GeneralService } from "@/services/general.service";
 import { getLocale } from "@/utils/localeUtils";
+import { Category } from "@/types";
 
 const { Title } = Typography;
 
@@ -212,8 +213,8 @@ const Categories: React.FC<Props> = ({ cats }) => {
 
     form.setFieldsValue({
       ...category,
-      image: convertToFileList(category.image, "image"),
-      icon: convertToFileList(category.icon, "icon"),
+      image: convertToFileList(category.image ?? null, "image"),
+      icon: convertToFileList(category.icon ?? null, "icon"),
     });
     handleLocaleChange(category.locale);
     setDrawerOpen(true);
@@ -395,7 +396,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
           value={localeFilter}
           onChange={(val) => {
             setLocaleFilter(val);
-            setPagination((prev) => ({ ...prev, current: 1 })); 
+            setPagination((prev) => ({ ...prev, current: 1 }));
           }}
           style={{ width: 200, marginBottom: 20 }}
         >
@@ -497,7 +498,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
             <Dragger
               name="image"
               multiple={false}
-              beforeUpload={() => false} 
+              beforeUpload={() => false}
               accept="image/*"
               maxCount={1}
               onRemove={() => {
@@ -529,7 +530,7 @@ const Categories: React.FC<Props> = ({ cats }) => {
               maxCount={1}
               listType="picture"
               onRemove={() => {
-                setIconRemoved(true); 
+                setIconRemoved(true);
                 return true;
               }}
             >

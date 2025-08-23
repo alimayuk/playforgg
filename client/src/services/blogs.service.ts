@@ -1,17 +1,8 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-import { getCookie } from "cookies-next";
+import { Blog } from "@/types";
+import { getLocale } from "@/utils/localeUtils";
 
-const getLocale = (): string => {
-    return getCookie("NEXT_LOCALE")?.toString() || "tr";
-};
-
-export interface Blog {
-    id: number;
-    title: string;
-    slug: string;
-    locale: string;
-    [key: string]: any;
-}
+const locale = getLocale();
 
 export const BlogsService = {
     getBlogs: async (
@@ -54,7 +45,6 @@ export const BlogsService = {
         });
     },
     deleteBlog: async (id: number): Promise<{ message: string }> => {
-        const locale = getLocale();
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/blogs/${id}?locale=${locale}`;
         const response = await fetchApi(url, {
             method: "DELETE",

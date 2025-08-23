@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import Title from '@/components/Title';
 import { usePathname } from 'next/navigation';
-import { ForumTopicDetail } from '@/services/forms.service';
 import { ClientService } from '@/services/client.service';
-import { getCookie } from 'cookies-next';
 import CommentsSection from '@/components/CommentsSection';
+import { ForumTopicDetail } from '@/types';
+import { getLocale } from '@/utils/localeUtils';
 
 
 const ForumDetailPage = () => {
@@ -14,8 +14,7 @@ const ForumDetailPage = () => {
   const [post, setPost] = useState<ForumTopicDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [postLoading, setPostLoading] = useState(false);
-  const locale = getCookie("NEXT_LOCALE")?.toString() || "tr";
-
+  const locale = getLocale();
   useEffect(() => {
     if (!slug) return;
 

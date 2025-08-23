@@ -4,15 +4,16 @@ import React, { useEffect, useState } from 'react'
 import {
     Form, Input, Select, Switch, Button, message,
 } from 'antd'
-import { InboxOutlined} from '@ant-design/icons'
+import { InboxOutlined } from '@ant-design/icons'
 import { MDXEditor } from '@mdxeditor/editor'
 import '@mdxeditor/editor/style.css'
 import {
     headingsPlugin, quotePlugin, listsPlugin, codeBlockPlugin, linkPlugin, imagePlugin, tablePlugin, markdownShortcutPlugin, frontmatterPlugin, toolbarPlugin, BoldItalicUnderlineToggles, BlockTypeSelect, ListsToggle, CodeToggle, CreateLink, InsertImage, InsertTable, Separator,
 } from '@mdxeditor/editor'
 import { getCookie } from 'cookies-next'
-import { CategoriesService, Category } from '@/services/categories.service'
+import { CategoriesService } from '@/services/categories.service'
 import Dragger from 'antd/es/upload/Dragger'
+import { Category } from '@/types'
 
 interface GameFormProps {
     initialValues?: any

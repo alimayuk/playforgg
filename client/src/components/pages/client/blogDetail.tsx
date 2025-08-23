@@ -57,7 +57,7 @@ export default function BlogDetailPage({ initialData }: Props) {
                 <CommentsSection
                     type="blogs"
                     contentId={blog.id}
-                    initialComments={comments} // İstersen initial data verebilirsin
+                    initialComments={comments}
                 />
             </div>
 

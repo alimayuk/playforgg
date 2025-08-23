@@ -1,27 +1,26 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
 import Title from '@/components/Title';
-import Cookies from 'js-cookie';
 import Loading from '@/components/Loading';
 import Empty from '@/components/Empty';
 import { Article, PaginatedResponse } from '@/types';
+import { getLocale } from '@/utils/localeUtils';
 
 interface Props {
     initialData: PaginatedResponse<Article>;
 }
 
-
 const ArticlesPage: React.FC<Props> = ({ initialData }) => {
     const [articles, setArticles] = useState<Article[]>(initialData.data || []);
     const [page, setPage] = useState(initialData.meta.current_page);
     const [lastPage, setLastPage] = useState(initialData.meta.last_page);
-    const [initialLoading, setInitialLoading] = useState(false); // SSR'de zaten data var
+    const [initialLoading, setInitialLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
 
     const loadMore = useCallback(async () => {
         if (loadingMore || page >= lastPage) return;
         setLoadingMore(true);
-        const locale = Cookies.get("NEXT_LOCALE") || "tr";
+        const locale = getLocale();
         try {
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_SERVER_URL}/client/articles?locale=${locale}&perPage=6&page=${page + 1}`

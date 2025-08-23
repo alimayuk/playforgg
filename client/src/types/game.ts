@@ -2,13 +2,14 @@ import { BaseEntity } from "./common/base";
 import { SubCategory } from "./common/response";
 import { ClientUser } from "./user";
 
-export type BlogType = Omit<Blog, 'category_id' | 'status' | 'locale' | 'comment_count' | 'views'> & {
+export type GameType = Omit<Game, 'category_id' | 'status' | 'locale' | 'views'> & {
     category: SubCategory;
     slug?: string;
     excerpt?: string;
+    user?: ClientUser;
 };
 
-export interface Blog extends BaseEntity {
+export interface Game extends BaseEntity {
     author_id?: number;
     category_id: number;
     title: string;
@@ -17,24 +18,12 @@ export interface Blog extends BaseEntity {
     content: string;
     status: boolean;
     views: number;
-    comment_count: number;
-    excerpt: string;
+    excerpt?: string;
     locale: string;
 }
 
-export interface BlogWithUser extends Blog {
-    user: ClientUser;
-}
-
-export interface OtherBlog extends BaseEntity {
+export interface OtherGame extends BaseEntity {
     title: string;
     slug: string;
-    image: string;
-}
-
-export interface BlogPost extends BaseEntity {
-    author: string;
-    slug: string;
-    title: string;
     image: string;
 }

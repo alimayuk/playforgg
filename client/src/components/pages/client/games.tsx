@@ -1,31 +1,15 @@
 'use client';
 import Title from '@/components/Title';
-import { Game } from '@/services/games.service';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 import Loading from '@/components/Loading';
 import Empty from '@/components/Empty';
-
-interface Category {
-    id: number;
-    title: string;
-    slug: string;
-}
+import { getLocale } from '@/utils/localeUtils';
+import { GameListResponse } from '@/types';
 
 interface Props {
-    initialData: {
-        data: Game[];
-        categories: Category[];
-        status: boolean;
-        meta: {
-            current_page: number;
-            last_page: number;
-            per_page: number;
-            total: number;
-        };
-    };
+    initialData: GameListResponse;
 }
 
 const GamePage: React.FC<Props> = ({ initialData }) => {
@@ -44,8 +28,8 @@ const GamePage: React.FC<Props> = ({ initialData }) => {
 
     useEffect(() => {
         const fetchFiltered = async () => {
-            setLoading(true); // yükleniyor başlasın
-            const locale = Cookies.get("NEXT_LOCALE") || "tr";
+            setLoading(true);
+            const locale = getLocale();
             try {
                 const res = await fetch(
                     `${process.env.NEXT_PUBLIC_SERVER_URL}/client/games?locale=${locale}&category=${selectedCategory}&perPage=9&page=${currentPage}`,
@@ -114,7 +98,7 @@ const GamePage: React.FC<Props> = ({ initialData }) => {
                     </div>
                 ) : games.length > 0 ? (
                     games.map((game) => (
-                        <a href={`/games/${game.slug}`} key={game.id} className="group">
+                        <Link href={`/games/${game.slug}`} key={game.id} className="group">
                             <div
                                 className="relative rounded-xl overflow-hidden cursor-pointer group shadow-lg isolate bg-gray-900 h-96 w-72 transition-transform duration-500 hover:scale-105"
                             >
@@ -142,7 +126,7 @@ const GamePage: React.FC<Props> = ({ initialData }) => {
                                     {/* Başlık */}
                                     <div className="text-white text-xl font-semibold leading-tight transition-transform duration-500 group-hover:-translate-y-2 space-y-1">
                                         <h3 className='line-clamp-3'>{game.title}</h3>
-                                        <p className="text-gray-400 text-sm">{game.user.username}</p>
+                                        <p className="text-gray-400 text-sm">{game.user?.username}</p>
                                     </div>
 
                                     {/* Açıklama */}
@@ -150,11 +134,11 @@ const GamePage: React.FC<Props> = ({ initialData }) => {
                                         className="mt-2 text-gray-300 text-sm opacity-0 max-h-0 overflow-hidden transition-all duration-500 group-hover:opacity-100 group-hover:max-h-28 line-clamp-4"
                                         style={{ transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)" }}
                                     >
-                                        {game.description}
+                                        {game.content}
                                     </div>
                                 </div>
                             </div>
-                        </a>
+                        </Link>
                     ))
                 ) : (
                     <div className="col-span-full">

@@ -4,27 +4,11 @@ import ImageSwiper from '@/components/ImageSwiper';
 import { CalendarDays, MessagesSquare } from 'lucide-react';
 import Title from '@/components/Title';
 import BlogCard from '@/components/BlogCard';
-import { useEffect, useState } from 'react';
-import { Blog } from '@/services/blogs.service';
-import { Game } from '@/services/client.service';
-import { Category, FeaturedCategories } from '@/services/categories.service';
+import { useState } from 'react';
 import Link from 'next/link';
 import { EmptyLittle } from '@/components/EmptyLittle';
 import { getLocale } from '@/utils/localeUtils';
-
-interface Forums {
-    id: number;
-    title: string;
-    slug: string;
-}
-interface HomePageData {
-    blogs: Blog[];
-    games: Game[];
-    categories: Category[];
-    featuredCategories: FeaturedCategories[];
-    forums: Forums[];
-    status: string;
-}
+import { HomePageData } from '@/types';
 
 interface Props {
     initialData: HomePageData;
@@ -228,7 +212,7 @@ const HomePage: React.FC<Props> = ({ initialData }) => {
                             title: blog.title,
                             image: blog.image,
                             author: blog.user.username,
-                            date: new Date(blog.created_at).toLocaleDateString(),
+                            created_at: new Date(blog.created_at).toLocaleDateString(),
                             slug: blog.slug
                         }} />
                     ))}
