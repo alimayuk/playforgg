@@ -1,6 +1,12 @@
 import { jwtVerify, JWTPayload } from "jose";
 
-// JWT secret key'ini güvenli şekilde alır ve encode eder
+export interface UserPayload extends JWTPayload {
+  id: number;
+  username: string;
+  email: string;
+  roles?: string[];
+}
+
 export function getJwtSecretKey(): Uint8Array {
   const secret = process.env.NEXT_PUBLIC_JWT_SECRET_KEY;
 
@@ -11,11 +17,20 @@ export function getJwtSecretKey(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-// JWT token'ı doğrular ve payload döner, doğrulama başarısızsa null döner
-export async function verifyJwtToken(token: string): Promise<JWTPayload | null> {
+export async function verifyJwtToken(token: string): Promise<UserPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getJwtSecretKey());
-    return payload;
+
+    // payload'ı UserPayload tipine dönüştürüyoruz
+    const userPayload: UserPayload = {
+      ...payload,
+      id: Number(payload.id) || 0,
+      username: String(payload.username || ''),
+      email: String(payload.email || ''),
+      roles: Array.isArray(payload.roles) ? payload.roles : []
+    };
+
+    return userPayload;
   } catch (error) {
     return null;
   }

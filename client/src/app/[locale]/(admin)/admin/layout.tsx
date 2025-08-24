@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { Avatar, Badge, Button, Drawer, Layout, Menu, theme } from "antd";
 import { usePathname } from "next/navigation";
-import { deleteCookie, getCookie } from "cookies-next";
+import { deleteCookie } from "cookies-next";
 import { useUserStore } from "@/stores/userStore";
 import '../../../globals.css';
 import LoadingScreen from "@/components/LoadingScreen";
@@ -38,7 +38,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  // Mobil ekran kontrolü
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -49,97 +48,93 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Logout fonksiyonu
-  const handleLogout = () => {
-    const token = getCookie("token");
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/logout/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      method: "GET",
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === true) {
-          deleteCookie("token", { path: "/" });
-          deleteCookie("a_token", { path: "/" });
-          window.location.href = "/";
-        } else {
-          console.error("Logout failed:", data.message);
-        }
-      })
-      .catch((err) => console.error("Error:", err));
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        deleteCookie("c", { path: "/" });
+        deleteCookie("token", { path: "/" });
+
+        useUserStore.getState().clearUser();
+
+        window.location.href = "/";
+      } else {
+        console.error("Logout failed:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      deleteCookie("c", { path: "/" });
+      deleteCookie("token", { path: "/" });
+      window.location.href = "/";
+    }
   };
 
-  // Menü elemanları
-  const pathSegments = pathname?.split("/") ?? [];
-  const locale = pathSegments[1] || "tr"; // default 'tr' yapabilirsin
-
-  // Menü elemanları
   const menuItems: MenuItem[] = [
     {
-      key: `/${locale}/admin`,
+      key: `/admin`,
       icon: <UserOutlined />,
-      label: <a className="text-inherit" href={`/${locale}/admin`}>Ana Sayfa</a>,
+      label: <a className="text-inherit" href={`/admin`}>Ana Sayfa</a>,
     },
     {
-      key: `/${locale}/admin/blogs`,
+      key: `/admin/blogs`,
       icon: <UploadOutlined />,
       label: <p>Bloglar</p>,
       children: [
         {
-          key: `/${locale}/admin/blogs/`,
-          label: <a className="text-inherit" href={`/${locale}/admin/blogs`}>Blog Listesi</a>,
+          key: `/admin/blogs/`,
+          label: <a className="text-inherit" href={`/admin/blogs`}>Blog Listesi</a>,
         },
         {
-          key: `/${locale}/admin/blogs/create`,
-          label: <a className="text-inherit" href={`/${locale}/admin/blogs/create`}>Blog Oluştur</a>,
+          key: `/admin/blogs/create`,
+          label: <a className="text-inherit" href={`/admin/blogs/create`}>Blog Oluştur</a>,
         },
       ],
     },
     {
-      key: `/${locale}/admin/categories`,
+      key: `/admin/categories`,
       icon: <UploadOutlined />,
-      label: <a className="text-inherit" href={`/${locale}/admin/categories`}>Kategoriler</a>,
+      label: <a className="text-inherit" href={`/admin/categories`}>Kategoriler</a>,
     },
     {
-      key: `/${locale}/admin/games`,
+      key: `/admin/games`,
       icon: <AndroidOutlined />,
       label: <p>Oyunlar</p>,
       children: [
         {
-          key: `/${locale}/admin/games/`,
-          label: <a className="text-inherit" href={`/${locale}/admin/games`}>Oyun Listesi</a>,
+          key: `/admin/games/`,
+          label: <a className="text-inherit" href={`/admin/games`}>Oyun Listesi</a>,
         },
         {
-          key: `/${locale}/admin/games/create`,
-          label: <a className="text-inherit" href={`/${locale}/admin/games/create`}>Oyun Oluştur</a>,
+          key: `/admin/games/create`,
+          label: <a className="text-inherit" href={`/admin/games/create`}>Oyun Oluştur</a>,
         },
       ],
     },
     {
-      key: `/${locale}/admin/news/`,
+      key: `/admin/news/`,
       icon: <AndroidOutlined />,
-      label: <a className="text-inherit" href={`/${locale}/admin/news`}>Haberler</a>,
+      label: <a className="text-inherit" href={`/admin/news`}>Haberler</a>,
     },
     ...(user?.roles?.includes("admin")
       ? [(
         {
-          key: `/${locale}/admin/settings`,
+          key: `/admin/settings`,
           icon: <UploadOutlined />,
-          label: <a className="text-inherit" href={`/${locale}/admin/settings`}>Ayarlar</a>,
+          label: <a className="text-inherit" href={`/admin/settings`}>Ayarlar</a>,
         }
       )] : []),
     ...(user ? [
       {
-        key: `/${locale}/admin/logout`,
+        key: `/admin/logout`,
         icon: <LogoutOutlined />,
         label: (
-          <a className="text-inherit" href={`/${locale}/admin/logout`}>
+          <button className="text-inherit" onClick={handleLogout}>
             Çıkış Yap
-          </a>
+          </button>
         ),
       }
     ] : []),

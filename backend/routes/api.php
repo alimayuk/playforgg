@@ -16,25 +16,19 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::prefix('/client')->group(function () {
     Route::get('/home', [ClientController::class, 'homePageData']);
-
     Route::get('/blogs', [ClientController::class, 'blogs']);
     Route::get('/blogs/{slug}', [ClientController::class, 'blogDetail']);
-
     Route::get('/articles', [ClientController::class, 'articles']);
     Route::get('/articles/{slug}', [ClientController::class, 'articleDetail']);
-
-     Route::get('{type}/{id}/comments', [ClientController::class, 'comments']);
-
+    Route::get('{type}/{id}/comments', [ClientController::class, 'comments']);
     Route::get('/forums', [ClientController::class, 'forumsIndex']);
     Route::get('/forums/{slug}', [ClientController::class, 'forumsDetail']);
-
     Route::get('/games', [ClientController::class, 'gamesIndex']);
     Route::get('/games/{slug}', [ClientController::class, 'gamesDetail']);
 });
 
 Route::middleware(['auth:api', 'global.throttle:60,1'])->group(function () {
     Route::put('/toggle-field/{model}/{id}', [ToggleController::class, 'toggleField']);
-    Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
 
     Route::prefix('{type}/{id}/comments')->group(function () {
         Route::get('/', [CommentController::class, 'index']);
@@ -43,10 +37,11 @@ Route::middleware(['auth:api', 'global.throttle:60,1'])->group(function () {
         Route::delete('/{comment}', [CommentController::class, 'destroy']);
     });
 
-
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+});
 
+Route::middleware(['auth:api', 'global.throttle:60,1', 'role:admin'])->group(function () {
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{id}', [CategoryController::class, 'update']);
@@ -57,7 +52,8 @@ Route::middleware(['auth:api', 'global.throttle:60,1'])->group(function () {
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::post('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
-
+    Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
+    
     Route::get('/games', [GameController::class, 'index']);
     Route::get('/games/{id}', [GameController::class, 'show']);
     Route::post('/games', [GameController::class, 'store']);

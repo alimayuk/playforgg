@@ -1,5 +1,5 @@
 import { fetchApi } from "@/app/lib/fetchApi";
-import { AuthResponse, LoginCredentials, User } from "@/types";
+import { AuthResponse, LoginCredentials, RegisterCredentials, User } from "@/types";
 
 export const UsersService = {
 
@@ -13,7 +13,7 @@ export const UsersService = {
     );
   },
 
-  register: async (values: User): Promise<AuthResponse> => {
+  register: async (values: RegisterCredentials): Promise<AuthResponse> => {
     return fetchApi<AuthResponse>(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/register`,
       {

@@ -1,17 +1,15 @@
 import { SignJWT } from "jose";
 import { getJwtSecretKey } from "../app/lib/jwtToken";
 import Cookies from 'js-cookie';
+import { ClientUser } from "@/types";
 
-interface User {
-  username: string;
-  email: string;
-}
-
-export const jwtTokenCreate = async (user: User): Promise<void> => {
+export const jwtTokenCreate = async (user: ClientUser): Promise<void> => {
   try {
     const token = await new SignJWT({
+      id: user.id,
       username: user.username,
       email: user.email,
+      roles: user.roles,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()

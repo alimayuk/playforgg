@@ -1,10 +1,11 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 import { locales, defaultLocale } from './i18n/i18n';
-import { verifyJwtToken } from './app/lib/jwtToken';
+import { verifyJwtToken, type UserPayload } from './app/lib/jwtToken';
 
 const AUTH_PAGES = ['login', 'register'];
 const PROTECTED_PATHS = ['admin'];
+const ADMIN_PATHS = ['admin'];
 
 const intlMiddleware = createIntlMiddleware({
   defaultLocale,
@@ -20,7 +21,7 @@ export async function middleware(request: NextRequest) {
     (loc) => pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)
   );
 
-  // Redirect to default locale if no locale in path
+  // Varsayılan locale yönlendirme
   if (pathname === '/') {
     const localeFromCookie = request.cookies.get('NEXT_LOCALE')?.value;
     const preferredLocale = locales.includes(localeFromCookie ?? '')
@@ -39,7 +40,8 @@ export async function middleware(request: NextRequest) {
 
   const pathWithoutLocale = pathname.slice(locale.length + 1) || '/';
   const token = request.cookies.get('c')?.value ?? null;
-  const hasVerifiedToken = token && (await verifyJwtToken(token));
+  const userData = token ? await verifyJwtToken(token) : null;
+  const hasVerifiedToken = !!userData;
 
   const isAuthPage = AUTH_PAGES.some((page) =>
     pathWithoutLocale === `/${page}` || pathWithoutLocale === page
@@ -49,8 +51,11 @@ export async function middleware(request: NextRequest) {
     pathWithoutLocale.startsWith(`/${path}`)
   );
 
-  // Handle invalid token cases
-  // middleware.ts
+  const isAdminPath = ADMIN_PATHS.some((path) =>
+    pathWithoutLocale.startsWith(`/${path}`)
+  );
+
+  // Geçersiz token durumu
   if (token && !hasVerifiedToken) {
     if (isProtectedPath) {
       const response = NextResponse.redirect(
@@ -63,13 +68,24 @@ export async function middleware(request: NextRequest) {
       const response = NextResponse.next();
       response.cookies.delete('c');
       response.cookies.delete('token');
-      // Client tarafında state'in temizlendiğini anlaması için bir header ekleyelim
       response.headers.set('x-clear-auth', 'true');
       return response;
     }
   }
 
-  // Auth pages handling
+  // Admin sayfaları için rol kontrolü
+  if (isAdminPath && hasVerifiedToken && userData) {
+    // Kullanıcının admin rolüne sahip olup olmadığını kontrol et
+    const userRoles = userData.roles || [];
+    const isAdmin = userRoles.includes('admin');
+    
+    if (!isAdmin) {
+      // Admin olmayan kullanıcıları not-found sayfasına yönlendir
+      return NextResponse.rewrite(new URL(`/${locale}/404`, request.url));
+    }
+  }
+
+  // Auth sayfaları işleme
   if (isAuthPage) {
     if (hasVerifiedToken) {
       return NextResponse.redirect(new URL(`/${locale}`, request.url));
@@ -77,7 +93,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protected paths handling
+  // Korumalı yollar işleme
   if (isProtectedPath && !hasVerifiedToken) {
     return NextResponse.redirect(
       new URL(`/${locale}/login?next=${encodeURIComponent(pathname)}`, request.url)

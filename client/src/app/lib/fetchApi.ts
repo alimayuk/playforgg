@@ -23,7 +23,6 @@ export const fetchApi = async <T = any>(
 
     if (response.status === 401 && !options.skipAuth) {
         document.cookie = 'token=; Max-Age=0; path=/';
-        throw new Error("SESSION_EXPIRED");
     }
 
     if (!response.ok) {

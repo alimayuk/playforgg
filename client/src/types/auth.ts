@@ -9,4 +9,5 @@ export interface AuthResponse {
     status: string;
     token: string;
     user?: User;
+    message?: string;
 }

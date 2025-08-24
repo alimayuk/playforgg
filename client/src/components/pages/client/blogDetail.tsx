@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BlogDetailResponse, Comment } from '@/types';
 import CommentsSection from '@/components/CommentsSection';
+import Image from 'next/image';
 
 type Props = {
     initialData: BlogDetailResponse;
@@ -34,15 +35,21 @@ export default function BlogDetailPage({ initialData }: Props) {
             <div className="lg:col-span-3 space-y-8 text-gray-200">
                 {/* Blog Content */}
                 <div>
-                    <img
-                        src={
-                            blog.image
-                                ? `${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${blog.image}`
-                                : 'https://via.placeholder.com/800x450?text=No+Image'
-                        }
-                        alt={blog.title}
-                        className="w-full h-72 object-cover object-top rounded-xl mb-6"
-                    />
+                    <div className="relative w-full h-96 mb-6">
+                        <Image
+                            src={
+                                blog.image
+                                    ? `${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${blog.image}`
+                                    : 'https://via.placeholder.com/800x450?text=No+Image'
+                            }
+                            alt={blog.title}
+                            fill
+                            className="object-cover object-top rounded-xl"
+                            priority
+                            sizes="(max-width: 1024px) 100vw, 75vw"
+                            quality={85} // kaliteyi arttır
+                        />
+                    </div>
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
                         <span>{blog.category.title}</span>
                         <span>{blog.created_at}</span>
@@ -68,15 +75,20 @@ export default function BlogDetailPage({ initialData }: Props) {
                     <ul className="space-y-4">
                         {otherBlogs.map((b) => (
                             <li key={b.id} className="flex gap-3 items-start">
-                                <img
+                                <Image
                                     src={
                                         b.image
                                             ? `${process.env.NEXT_PUBLIC_GLOBAL_SERVER_URL}/${b.image}`
                                             : 'https://via.placeholder.com/800x450?text=No+Image'
                                     }
                                     alt={b.title}
+                                    width={80}
+                                    height={80}
                                     className="w-20 h-20 object-cover rounded-md shrink-0"
+                                    sizes="80px"
+                                    quality={85}
                                 />
+
                                 <div className="flex-1">
                                     <Link href={`/blogs/${b.slug}`}>
                                         <p className="font-medium text-gray-300 hover:text-orange-500 text-md line-clamp-2 mb-1">

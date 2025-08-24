@@ -5,8 +5,8 @@ import { Card, DatePicker } from 'antd';
 import { Pie, Column, Line, Bar } from '@ant-design/charts';
 import { useUserStore } from '@/stores/userStore';
 import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween'; // ✅ import plugin
-dayjs.extend(isBetween); // ✅ extend plugin
+import isBetween from 'dayjs/plugin/isBetween';
+dayjs.extend(isBetween);
 
 const { RangePicker } = DatePicker;
 

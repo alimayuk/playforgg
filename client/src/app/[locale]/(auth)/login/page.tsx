@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { UsersService } from '@/services/users.service';
 import { jwtTokenCreate } from '@/utils/jwtTokenCreate';
 
 const LoginPage = () => {
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('123123asd');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
