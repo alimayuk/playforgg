@@ -10,6 +10,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\ToggleController;
+use App\Http\Controllers\UserController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -38,6 +39,7 @@ Route::middleware(['auth:api', 'global.throttle:60,1'])->group(function () {
     });
 
     Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/profile/{username}', [UserController::class, 'getUserProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
@@ -53,7 +55,7 @@ Route::middleware(['auth:api', 'global.throttle:60,1', 'role:admin'])->group(fun
     Route::post('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
     Route::post('/upload-temp', [BlogController::class, 'uploadTemp']);
-    
+
     Route::get('/games', [GameController::class, 'index']);
     Route::get('/games/{id}', [GameController::class, 'show']);
     Route::post('/games', [GameController::class, 'store']);

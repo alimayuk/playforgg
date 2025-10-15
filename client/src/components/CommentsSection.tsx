@@ -170,7 +170,7 @@ export default function CommentsSection({ type, contentId, initialComments }: Co
                 ) : (comments.map((comment) => (
                     <div key={comment.id} className="bg-[#1e293b] rounded-lg p-4">
                         <div className="flex justify-between">
-                            <p className="font-semibold text-sm text-orange-400">{comment.user.username}</p>
+                            <Link href={`/profile/${comment.user.username}`} className="font-semibold text-sm text-orange-400">{comment.user.username}</Link>
 
                             {/* Eğer giriş yapmış kullanıcı kendi yorumunu görüyorsa */}
                             {user && user.id === comment.user.id && (

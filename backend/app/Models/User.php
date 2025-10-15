@@ -36,4 +36,9 @@ class User extends Authenticatable implements JWTSubject
         $userRoles = is_array($this->roles) ? $this->roles : [$this->roles];
         return count(array_intersect($roles, $userRoles)) > 0;
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'author_id');
+    }
 }

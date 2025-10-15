@@ -1,4 +1,8 @@
 ***************************YAPILACAKLAR**********************************
+*profil sayfası yapılacak.
+
+
+
 *blog yapısı kategori gibi
 -haberler -bloglar -kılavuzlar -oyun ipucları
 

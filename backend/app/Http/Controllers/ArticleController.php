@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ArticleRequest;
+use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
@@ -21,44 +23,18 @@ class ArticleController extends Controller
             $query->where('locale', $locale);
         }
 
-        $query->select([
-            'id',
-            'title',
-            'slug',
-            'excerpt',
-            'status',
-            'image',
-            'locale',
-            'created_at',
-        ])->orderBy('created_at', 'desc');
+        $articles = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
-        $articles = $query->paginate($perPage);
 
-        return response()->json([
-            'data' => $articles->items(),
-            'status' => true,
-            'meta' => [
-                'current_page' => $articles->currentPage(),
-                'last_page' => $articles->lastPage(),
-                'per_page' => $articles->perPage(),
-                'total' => $articles->total(),
-            ]
-        ]);
+        return ArticleResource::collection($articles)
+            ->additional([
+                'status' => true,
+            ]);
     }
 
-    public function store(Request $request)
+    public function store(ArticleRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:300|unique:categories,slug',
-            'image' => 'nullable|image',
-            'status' => 'boolean',
-            'excerpt' => 'nullable|string',
-            'locale' => 'nullable|in:tr,en',
-        ]);
-
-        $data = $request->all();
-
+        $data = $request->validated();
         $data['locale'] = $request->input('locale', 'tr');
 
         if (!$request->slug) {
@@ -75,33 +51,21 @@ class ArticleController extends Controller
         $data['author_id'] = auth()->id();
         $article = Article::create($data);
 
-        return response()->json([
-            "message" => "Haber başarıyla oluşturuldu.",
-            "data" => $article,
-            "status" => true
-        ], 201);
+        return new ArticleResource($article);
     }
 
-    public function update(Request $request, $id)
+    public function update(ArticleRequest $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'image' => 'nullable|image',
-            'status' => 'nullable|boolean',
-            'excerpt' => 'nullable|string',
-            'locale' => 'nullable|in:tr,en',
-        ]);
-
+        $data = $request->validated();
         $article = Article::find($id);
         if (!$article) {
             return response()->json(['status' => 'error', 'message' => 'Haber bulunamadı!'], 404);
         }
 
-        $data = $request->all();
-
-        if (!$request->slug) {
+        if (empty($data['slug'])) {
             $data['slug'] = Str::slug($request->title);
         }
+
 
         if ($request->boolean('remove_image')) {
             ImageService::deleteImage($article->image);
@@ -116,7 +80,7 @@ class ArticleController extends Controller
 
         return response()->json([
             'message' => 'Kayıt başarıyla güncellendi.',
-            'data' => $article,
+            'data' => new ArticleResource($article),
             'status' => true
         ], 200);
     }

@@ -130,7 +130,7 @@ const Articles: React.FC<Props> = ({ initialData }) => {
 
       const formData = new FormData();
 
-      formData.append("title", values.title);
+      formData.append("title", values.title || "");
       formData.append("locale", values.locale);
       formData.append("status", values.status ? "1" : "0");
       formData.append("excerpt", values.excerpt || "");

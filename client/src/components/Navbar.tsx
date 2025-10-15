@@ -328,7 +328,7 @@ function MobileMenu({
           {user ? (
             <>
               <Link
-                href="/profile"
+                href={`/profile/${user.username}`}
                 onClick={onClose}
                 className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm font-semibold hover:bg-gray-700 transition mt-6 flex items-center gap-2"
               >
@@ -546,7 +546,7 @@ function UserDropdown({ user, onLogout }: { user: any; onLogout: () => void }) {
         onMouseLeave={closeMenu}
       >
         <Link
-          href="/profile"
+          href={`/profile/${user.username}`}
           className="block px-4 py-2 text-sm hover:bg-orange-600 hover:text-white"
           onClick={() => setIsOpen(false)}
         >

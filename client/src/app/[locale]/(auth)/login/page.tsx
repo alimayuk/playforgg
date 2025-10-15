@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { UsersService } from '@/services/users.service';
 import { jwtTokenCreate } from '@/utils/jwtTokenCreate';
+import { generateFormMetadata } from '@/utils/metadataUtils';
+import { Metadata } from 'next';
+import { getLocale } from '@/utils/localeUtils';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -54,12 +57,12 @@ const LoginPage = () => {
             Giriş Yap
           </button>
         </form>
-        <p className="text-center mt-4 text-sm text-black">
+        {/* <p className="text-center mt-4 text-sm text-black">
           Hesabınız yok mu?{' '}
           <a href="/register" className="text-orange-500 hover:underline">
             Kayıt Ol
           </a>
-        </p>
+        </p> */}
       </div>
     </div>
   );

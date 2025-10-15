@@ -1,5 +1,7 @@
 import { getLocale } from '@/utils/localeUtils';
 import HomePage from '@/components/pages/client/homePage';
+import { generateHomeMetadata } from '@/utils/metadataUtils';
+import { Metadata } from 'next';
 
 const fetchHomeData = async () => {
     const locale = getLocale();
@@ -16,6 +18,11 @@ const fetchHomeData = async () => {
 
     return res.json();
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = getLocale();
+    return generateHomeMetadata(locale);
+}
 
 const Page = async () => {
     const home = await fetchHomeData();

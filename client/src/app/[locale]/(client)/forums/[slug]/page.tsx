@@ -6,6 +6,7 @@ import { ClientService } from '@/services/client.service';
 import CommentsSection from '@/components/CommentsSection';
 import { ForumTopicDetail } from '@/types';
 import { getLocale } from '@/utils/localeUtils';
+import Link from 'next/link';
 
 
 const ForumDetailPage = () => {
@@ -64,9 +65,9 @@ const ForumDetailPage = () => {
         </div>
 
         <div className="flex items-center gap-2.5 pt-3 border-t border-gray-800/50">
-          <span className="text-sm font-medium text-gray-300/90">
+          <Link href={`/profile/${post.user.username}`} className="text-sm font-medium text-gray-300/90">
             @{post.user.username}
-          </span>
+          </Link>
           <span className="text-xs text-gray-500/80 before:content-['•'] before:mx-1.5">
             {post.views.toLocaleString('tr-TR')} görüntülenme
           </span>
